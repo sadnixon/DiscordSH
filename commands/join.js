@@ -20,6 +20,7 @@ async function execute(message, args, user) {
       }
       if (current_game.players.length === 7) {
         current_game.gameState.phase = "nomWait";
+        current_game.gameState.presidentId = 0;
         await game_info.set("games", games);
         current_game.players = shuffleArray(current_game.players);
         const roles = shuffleArray([
@@ -51,9 +52,9 @@ async function execute(message, args, user) {
             }
           }
         }
+        gameStateMessage(message,current_game);
       }
       await game_info.set("games", games);
-      gameStateMessage(message,current_game);
     } else {
       if ( current_game.gameState.phase !== "joinWait" ) {
         message.channel.send(errorMessage("Game already started!"));

@@ -39,8 +39,10 @@ async function execute(message, args, user) {
           "B",
         ]),
         discard: [],
-        presidentId: 0,
-        chancellorId: 0,
+        presidentId: -1,
+        chancellorId: -1,
+        lastPresidentId: -1,
+        lastChancellorId: -1,
         presidentHand: [],
         chancellorHand: [],
         votes: {

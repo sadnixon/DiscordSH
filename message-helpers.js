@@ -1,10 +1,26 @@
 const Discord = require("discord.js");
+const _ = require("lodash");
 
 const errorMessage = (message) => {
   return new Discord.MessageEmbed().setDescription(message).setColor("#ff0000");
 };
 
 const gameStateMessage = (message, game) => {
+  const deads = _.range(0, 7).map((i) =>
+    game.gameState.deadPlayers.includes(i) ? "~~" : ""
+  );
+  const pres = _.range(0, 7).map((i) =>
+    game.gameState.presidentId === i ? "(P)" : ""
+  );
+  const chanc = _.range(0, 7).map((i) =>
+    game.gameState.chancellorId === i ? "(C)" : ""
+  );
+  const TL = _.range(0, 7).map((i) =>
+    game.gameState.lastPresidentId === i ||
+    game.gameState.lastChancellorId === i
+      ? "(TL)"
+      : ""
+  );
   const embed = new Discord.MessageEmbed()
     .setTitle("Gamestate Update")
     .setDescription(
@@ -15,7 +31,12 @@ const gameStateMessage = (message, game) => {
       )}\n${"🟥".repeat(game.gameState.fas)}${"⬛🔎🗳️🔫🔫⬛".slice(
         game.gameState.fas
       )}\n\n${game.players
-        .map((player) => `${player.seat}. <@${player.id}>`)
+        .map(
+          (player) =>
+            `${deads[player.seat]}${player.seat}. <@${player.id}> ${
+              pres[player.seat]
+            }${chanc[player.seat]} ${TL[player.seat]}${deads[player.seat]}`
+        )
         .join("\n")}`
     )
     .setFooter(`Waiting on: ${game.gameState.phase.slice(0, -4)}`);

@@ -4,6 +4,24 @@ const errorMessage = (message) => {
   return new Discord.MessageEmbed().setDescription(message).setColor("#ff0000");
 };
 
+const gameStateMessage = (message, game) => {
+  const embed = new Discord.MessageEmbed()
+    .setTitle("Gamestate Update")
+    .setDescription(
+      `${"🟦".repeat(game.gameState.lib)}${"⬛".repeat(
+        5 - game.gameState.lib
+      )}\n${"⭕".repeat(game.gameState.failedGovs)}${"⚫".repeat(
+        3 - game.gameState.failedGovs
+      )}\n${"🟥".repeat(game.gameState.fas)}${"⬛🔎🗳️🔫🔫⬛".slice(
+        game.gameState.fas
+      )}\n\n${game.players
+        .map((player) => `${player.seat}. <@${player.id}>`)
+        .join("\n")}`
+    )
+    .setFooter(`Waiting on: ${game.gameState.phase.slice(0, -4)}`);
+  message.channel.send(embed);
+};
+
 async function sendDM(message, dmText, id) {
   const player_disc = await message.guild.members
     .fetch(`${id}`)
@@ -62,4 +80,11 @@ const roundToThirds = (points) => {
   return +(Math.round(points * 12) / 12).toFixed(2);
 };
 
-module.exports = { errorMessage, rank, roundToThirds, shuffleArray, sendDM };
+module.exports = {
+  errorMessage,
+  rank,
+  roundToThirds,
+  shuffleArray,
+  sendDM,
+  gameStateMessage,
+};

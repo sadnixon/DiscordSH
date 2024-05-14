@@ -4,6 +4,18 @@ const errorMessage = (message) => {
   return new Discord.MessageEmbed().setDescription(message).setColor("#ff0000");
 };
 
+async function sendDM(message, dmText, id) {
+  const player_disc = await message.guild.members
+    .fetch(`${id}`)
+    .catch(() => null);
+  if (!player_disc) return message.channel.send("User not found:(");
+  await player_disc.send(dmText).catch(() => {
+    message.channel.send(
+      "User has DMs closed or has no mutual servers with the bot:("
+    );
+  });
+}
+
 const rank = (competitorList, column, secondary = false, limit = 10) => {
   // assume competitorList is sorted by column
   // returns rank of each competitor (i and j have the same rank if i[column] === j[column])
@@ -36,7 +48,7 @@ const rank = (competitorList, column, secondary = false, limit = 10) => {
   return ranks;
 };
 
-const shuffleArray = array => {
+const shuffleArray = (array) => {
   for (let i = array.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
     const temp = array[i];
@@ -50,4 +62,4 @@ const roundToThirds = (points) => {
   return +(Math.round(points * 12) / 12).toFixed(2);
 };
 
-module.exports = { errorMessage, rank, roundToThirds, shuffleArray };
+module.exports = { errorMessage, rank, roundToThirds, shuffleArray, sendDM };

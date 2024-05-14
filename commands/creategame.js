@@ -1,5 +1,5 @@
 //const sheet = require("../sheet");
-const { shuffleArray } = require("../message-helpers");
+const { errorMessage, shuffleArray } = require("../message-helpers");
 
 async function execute(message, args, user) {
   const channels = await game_info.get("game_channels");
@@ -39,11 +39,32 @@ async function execute(message, args, user) {
           "B",
         ]),
         discard: [],
+        presidentId: 0,
+        chancellorId: 0,
+        presidentHand: [],
+        chancellorHand: [],
+        votes: {
+          0: null,
+          1: null,
+          2: null,
+          3: null,
+          4: null,
+          5: null,
+          6: null,
+        },
+        presidentVeto: null,
+        chancellorVeto: null,
+        phase: "join",
         deadPlayers: [],
         hitlerElected: false,
         hitlerDead: false,
+        log: {},
       },
     };
+    //const roles = shuffleArray(["liberal","liberal","liberal","liberal","fascist","fascist","hitler"]);
+    //for (let i = 0; i < 7; i++) {
+    //  games[game_id]["players"].push({"role": roles[i], "seat": i});
+    //}
     console.log(games[game_id]);
     await game_info.set("game_channels", channels);
     await game_info.set("games", games);

@@ -1,7 +1,7 @@
 const fs = require("fs");
 const Discord = require("discord.js");
 const Keyv = require("keyv");
-const sheet = require("./sheet");
+//const sheet = require("./sheet");
 const client = new Discord.Client();
 const { format, utcToZonedTime } = require("date-fns-tz");
 const {
@@ -24,28 +24,19 @@ if (ENABLE_SENTRY) {
 }
 
 global.authorized_data_setters;
-global.team_roles_channels;
-//global.open = false;
-//global.subGameIndicator = false;
-//global.finalGame = false;
-//global.guessDict = false;
-global.guess_information;
+global.game_info;
 global.coolDown = false;
 
 if (ENABLE_DB) {
-  authorized_data_setters = new Keyv("mongodb://localhost:27017/tourney-bot", {
+  authorized_data_setters = new Keyv("mongodb://localhost:27017/discord-sh", {
     namespace: "authorized_data_setter",
   });
-  team_roles_channels = new Keyv("mongodb://localhost:27017/tourney-bot", {
-    namespace: "team_roles_channels",
-  });
-  guess_information = new Keyv("mongodb://localhost:27017/tourney-bot", {
-    namespace: "guess_information",
+  game_info = new Keyv("mongodb://localhost:27017/discord-sh", {
+    namespace: "game_info",
   });
 } else {
   authorized_data_setters = new Keyv();
-  team_roles_channels = new Keyv();
-  guess_information = new Keyv();
+  game_info = new Keyv();
 }
 
 client.commands = new Discord.Collection();
@@ -72,24 +63,11 @@ client.on("message", async (message) => {
     await authorized_data_setters.set("auth", []);
   }
 
-  if (!(await team_roles_channels.get("teams"))) {
-    await team_roles_channels.set("teams", []);
+  if (!(await game_info.get("games"))) {
+    await game_info.set("games", {});
   }
-
-  if (!(await guess_information.get("open"))) {
-    await guess_information.set("open", false);
-  }
-  if (!(await guess_information.get("openSpecial"))) {
-    await guess_information.set("openSpecial", false);
-  }
-  if (!(await guess_information.get("subGameIndicator"))) {
-    await guess_information.set("subGameIndicator", false);
-  }
-  if (!(await guess_information.get("finalGame"))) {
-    await guess_information.set("finalGame", false);
-  }
-  if (!(await guess_information.get("specialFinalGame"))) {
-    await guess_information.set("specialFinalGame", false);
+  if (!(await game_info.get("game_channels"))) {
+    await game_info.set("game_channels", {});
   }
 
   const isAuthorized =
@@ -102,7 +80,7 @@ client.on("message", async (message) => {
   const commandName = args.shift().toLowerCase();
 
   const updateTime = format(
-    utcToZonedTime(sheet.getUpdateTime(), "Etc/UTC"),
+    utcToZonedTime(new Date(new Date().getTime()), "Etc/UTC"),
     "h:mm:ss a zzz",
     { timeZone: "Etc/UTC" }
   );

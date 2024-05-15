@@ -33,6 +33,7 @@ async function execute(message, args, user) {
         lib: 0,
         fas: 0,
         failedGovs: 0,
+        specialElected: false,
         deck: shuffleArray([
           "R", "R", "R", "R",
           "R", "R", "R", "R",

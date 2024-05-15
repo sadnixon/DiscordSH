@@ -3,6 +3,7 @@ const {
   shuffleArray,
   sendDM,
   gameStateMessage,
+  advancePres,
 } = require("../message-helpers");
 const _ = require("lodash");
 
@@ -31,17 +32,7 @@ async function execute(message, args, user) {
           current_game.gameState.presidentId;
         current_game.gameState.lastChancellorId =
           current_game.gameState.chancellorId;
-        current_game.gameState.presidentId =
-          (current_game.gameState.presidentId + 1) % 7;
-        while (
-          current_game.gameState.deadPlayers.includes(
-            current_game.gameState.presidentId
-          )
-        ) {
-          current_game.gameState.presidentId =
-            (current_game.gameState.presidentId + 1) % 7;
-        }
-        current_game.gameState.chancellorId = -1;
+        advancePres(current_game);
         current_game.gameState.lib++;
         //GOTTA IMPLEMENT GAME ENDING STUFF HERE EVENTUALLY
       } else {
@@ -52,17 +43,7 @@ async function execute(message, args, user) {
             current_game.gameState.presidentId;
           current_game.gameState.lastChancellorId =
             current_game.gameState.chancellorId;
-          current_game.gameState.presidentId =
-            (current_game.gameState.presidentId + 1) % 7;
-          while (
-            current_game.gameState.deadPlayers.includes(
-              current_game.gameState.presidentId
-            )
-          ) {
-            current_game.gameState.presidentId =
-              (current_game.gameState.presidentId + 1) % 7;
-          }
-          current_game.gameState.chancellorId = -1;
+          advancePres(current_game);
         } else if (current_game.gameState.fas === 2) {
           current_game.gameState.phase = "investWait";
         } else if (current_game.gameState.fas === 3) {
@@ -71,6 +52,12 @@ async function execute(message, args, user) {
           current_game.gameState.phase = "gunWait";
         }
         //GOTTA IMPLEMENT GAME ENDING STUFF HERE EVENTUALLY
+      }
+      if (current_game.gameState.deck.length < 3) {
+        current_game.gameState.deck = shuffleArray(
+          current_game.gameState.deck.concat(current_game.gameState.discard)
+        );
+        current_game.gameState.discard = [];
       }
       gameStateMessage(message, current_game);
       await game_info.set("games", games);

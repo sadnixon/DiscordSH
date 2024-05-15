@@ -73,9 +73,7 @@ async function sendDM(message, game, dmText, id) {
     player_disc = await guild.members.fetch(`${id}`).catch(() => null);
     if (!player_disc) return message.channel.send("User not found:(");
   } else {
-    player_disc = await message.guild.members
-      .fetch(`${id}`)
-      .catch(() => null);
+    player_disc = await message.guild.members.fetch(`${id}`).catch(() => null);
     if (!player_disc) return message.channel.send("User not found:(");
   }
   await player_disc.send(dmText).catch(() => {
@@ -84,6 +82,19 @@ async function sendDM(message, game, dmText, id) {
     );
   });
 }
+
+const advancePres = (game) => {
+  if (game.gameState.specialElected) {
+    game.gameState.presidentId = (game.gameState.lastPresidentId + 1) % 7;
+    game.gameState.specialElected = false;
+  } else {
+    game.gameState.presidentId = (game.gameState.presidentId + 1) % 7;
+  }
+  while (game.gameState.deadPlayers.includes(game.gameState.presidentId)) {
+    game.gameState.presidentId = (game.gameState.presidentId + 1) % 7;
+  }
+  game.gameState.chancellorId = -1;
+};
 
 const rank = (competitorList, column, secondary = false, limit = 10) => {
   // assume competitorList is sorted by column
@@ -138,4 +149,5 @@ module.exports = {
   shuffleArray,
   sendDM,
   gameStateMessage,
+  advancePres,
 };

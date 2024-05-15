@@ -3,6 +3,7 @@ const {
   shuffleArray,
   sendDM,
   gameStateMessage,
+  advancePres,
 } = require("../message-helpers");
 const _ = require("lodash");
 
@@ -25,6 +26,8 @@ async function execute(message, args, user) {
       ) {
         vote_index = parseInt(args[1]);
       }
+      if (current_game.gameState.deadPlayers.includes(vote_index))
+        return message.channel.send(errorMessage("You are dead!"));
       if (args[0].toLowerCase() === "ja") {
         current_game.gameState.votes[vote_index] = true;
       } else {
@@ -40,6 +43,10 @@ async function execute(message, args, user) {
         current_game.players.length + current_game.gameState.deadPlayers.length
       ) {
         current_game.gameState.log.votes = vote_list;
+        current_game.gameState.log.presidentId =
+          current_game.gameState.presidentId;
+        current_game.gameState.log.chancellorId =
+          current_game.gameState.chancellorId;
         if (
           vote_list.filter((e) => e).length >
           vote_list.filter((e) => e !== null).length / 2
@@ -62,17 +69,7 @@ async function execute(message, args, user) {
         } else {
           current_game.gameState.phase = "nomWait";
           current_game.gameState.failedGovs++;
-          current_game.gameState.chancellorId = -1;
-          current_game.gameState.presidentId =
-            (current_game.gameState.presidentId + 1) % 7;
-          while (
-            current_game.gameState.deadPlayers.includes(
-              current_game.gameState.presidentId
-            )
-          ) {
-            current_game.gameState.presidentId =
-              (current_game.gameState.presidentId + 1) % 7;
-          }
+          advancePres(current_game);
           if (current_game.gameState.failedGovs > 2) {
             current_game.gameState.failedGovs = 0;
             const top_deck = current_game.gameState.deck.pop();

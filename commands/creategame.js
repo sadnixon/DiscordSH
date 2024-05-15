@@ -27,6 +27,7 @@ async function execute(message, args, user) {
       },
       players: [],
       logs: [],
+      player_ids: {},
       gameState: {
         lib: 0,
         fas: 0,

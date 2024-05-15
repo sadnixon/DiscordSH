@@ -15,12 +15,23 @@ const gameStateMessage = (message, game) => {
   const chanc = _.range(0, 7).map((i) =>
     game.gameState.chancellorId === i ? "(C)" : ""
   );
-  const TL = _.range(0, 7).map((i) =>
-    game.gameState.lastPresidentId === i ||
-    game.gameState.lastChancellorId === i
-      ? "(TL)"
-      : ""
-  );
+  var TL;
+  if (
+    game.players.length - game.gameState.deadPlayers.length >
+    5
+  ) {
+    TL = _.range(0, 7).map((i) =>
+      game.gameState.lastPresidentId === i ||
+      game.gameState.lastChancellorId === i
+        ? "(TL)"
+        : ""
+    );
+  } else {
+    TL = _.range(0, 7).map((i) =>
+      game.gameState.lastChancellorId === i ? "(TL)" : ""
+    );
+  }
+
   const embed = new Discord.MessageEmbed()
     .setTitle("Gamestate Update")
     .setDescription(

@@ -35,6 +35,7 @@ async function execute(message, args, user) {
         for (let i = 0; i < 7; i++) {
           current_game.players[i].role = roles[i];
           current_game.players[i].seat = i;
+          current_game.player_ids[current_game.players[i].id] = i;
           sendDM(
             message,
             `Your seat is **${i}** and your role is **${roles[i]}**`,

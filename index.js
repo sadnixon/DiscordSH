@@ -2,7 +2,7 @@ const fs = require("fs");
 const Discord = require("discord.js");
 const Keyv = require("keyv");
 //const sheet = require("./sheet");
-const client = new Discord.Client();
+global.client = new Discord.Client();
 const { format, utcToZonedTime } = require("date-fns-tz");
 const {
   PREFIX,

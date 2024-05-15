@@ -3,7 +3,6 @@ const { errorMessage, shuffleArray } = require("../message-helpers");
 
 async function execute(message, args, user) {
   const channels = await game_info.get("game_channels");
-  console.log(channels);
   if (!(message.channel.id in channels)) {
     const games = await game_info.get("games");
     const game_id = message.channel.id.toString() + "_" + Date.now().toString();
@@ -28,6 +27,8 @@ async function execute(message, args, user) {
       players: [],
       logs: [],
       player_ids: {},
+      guild_id: message.guild.id,
+      channel_id: message.channel.id,
       gameState: {
         lib: 0,
         fas: 0,
@@ -68,12 +69,9 @@ async function execute(message, args, user) {
     //for (let i = 0; i < 7; i++) {
     //  games[game_id]["players"].push({"role": roles[i], "seat": i});
     //}
-    console.log(games[game_id]);
     await game_info.set("game_channels", channels);
     await game_info.set("games", games);
   }
-  //console.log(await game_info.get("game_channels"));
-  //console.log(await game_info.get("games"));
   message.channel.send("Game Made!");
 }
 

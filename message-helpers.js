@@ -57,7 +57,13 @@ const gameStateMessage = (message, game) => {
         .join("\n")}`
     )
     .setFooter(`Waiting on: ${game.gameState.phase.slice(0, -4)}`);
-  message.channel.send(embed);
+  if (message.channel.type === "dm") {
+    const guild = client.guilds.cache.get(game.guild_id);
+    const channel = guild.channels.cache.get(game.channel_id);
+    channel.send(embed);
+  } else {
+    message.channel.send(embed);
+  }
 };
 
 async function sendDM(message, dmText, id) {

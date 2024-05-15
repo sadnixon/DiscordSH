@@ -46,6 +46,19 @@ async function execute(message, args, user) {
         ) {
           current_game.gameState.failedGovs = 0;
           current_game.gameState.phase = "presWait";
+          for (let i = 0; i < 3; i++) {
+            current_game.gameState.presidentHand.push(
+              current_game.gameState.deck.pop()
+            );
+          }
+          sendDM(
+            message,
+            current_game,
+            `You have drawn **${current_game.gameState.presidentHand.join(
+              ""
+            )}**. Please choose a card to discard.`,
+            current_game.players[current_game.gameState.presidentId].id
+          );
         } else {
           current_game.gameState.phase = "nomWait";
           current_game.gameState.failedGovs++;
@@ -63,11 +76,20 @@ async function execute(message, args, user) {
           if (current_game.gameState.failedGovs > 2) {
             current_game.gameState.failedGovs = 0;
             const top_deck = current_game.gameState.deck.pop();
-            if (top_deck === "L") {
+            if (top_deck === "B") {
               current_game.gameState.lib++;
             } else {
               current_game.gameState.fas++;
             }
+            if (current_game.gameState.deck.length < 3) {
+              current_game.gameState.deck = shuffleArray(
+                current_game.gameState.deck.concat(
+                  current_game.gameState.discard
+                )
+              );
+              current_game.gameState.discard = [];
+            }
+            //GOTTA IMPLEMENT GAME ENDING STUFF HERE EVENTUALLY
           }
         }
         gameStateMessage(message, current_game);

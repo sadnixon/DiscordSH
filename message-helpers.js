@@ -66,11 +66,18 @@ const gameStateMessage = (message, game) => {
   }
 };
 
-async function sendDM(message, dmText, id) {
-  const player_disc = await message.guild.members
-    .fetch(`${id}`)
-    .catch(() => null);
-  if (!player_disc) return message.channel.send("User not found:(");
+async function sendDM(message, game, dmText, id) {
+  let player_disc;
+  if (message.channel.type === "dm") {
+    const guild = await client.guilds.cache.get(game.guild_id);
+    player_disc = await guild.members.fetch(`${id}`).catch(() => null);
+    if (!player_disc) return message.channel.send("User not found:(");
+  } else {
+    player_disc = await message.guild.members
+      .fetch(`${id}`)
+      .catch(() => null);
+    if (!player_disc) return message.channel.send("User not found:(");
+  }
   await player_disc.send(dmText).catch(() => {
     message.channel.send(
       "User has DMs closed or has no mutual servers with the bot:("

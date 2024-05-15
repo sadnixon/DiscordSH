@@ -46,6 +46,7 @@ async function execute(message, args, user) {
           current_game.player_ids[current_game.players[i].id] = i;
           sendDM(
             message,
+            current_game,
             `Your seat is **${i}** and your role is **${roles[i]}**`,
             current_game.players[i].id
           );
@@ -54,6 +55,7 @@ async function execute(message, args, user) {
               if (i !== j && roles[j] !== "liberal") {
                 sendDM(
                   message,
+                  current_game,
                   `The player <@${current_game.players[j].id}> in seat **${j}** is **${roles[j]}**`,
                   current_game.players[i].id
                 );

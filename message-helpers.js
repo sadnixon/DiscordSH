@@ -16,10 +16,7 @@ const gameStateMessage = (message, game) => {
     game.gameState.chancellorId === i ? "(C)" : ""
   );
   var TL;
-  if (
-    game.players.length - game.gameState.deadPlayers.length >
-    5
-  ) {
+  if (game.players.length - game.gameState.deadPlayers.length > 5) {
     TL = _.range(0, 7).map((i) =>
       game.gameState.lastPresidentId === i ||
       game.gameState.lastChancellorId === i
@@ -31,6 +28,13 @@ const gameStateMessage = (message, game) => {
       game.gameState.lastChancellorId === i ? "(TL)" : ""
     );
   }
+  const votes = _.range(0, 7).map((i) =>
+    game.gameState.votes[i]
+      ? "Ja"
+      : game.gameState.votes[i] === false
+      ? "Nein"
+      : ""
+  );
 
   const embed = new Discord.MessageEmbed()
     .setTitle("Gamestate Update")
@@ -46,7 +50,9 @@ const gameStateMessage = (message, game) => {
           (player) =>
             `${deads[player.seat]}${player.seat}. <@${player.id}> ${
               pres[player.seat]
-            }${chanc[player.seat]} ${TL[player.seat]}${deads[player.seat]}`
+            }${chanc[player.seat]} ${TL[player.seat]} ${votes[player.seat]}${
+              deads[player.seat]
+            }`
         )
         .join("\n")}`
     )

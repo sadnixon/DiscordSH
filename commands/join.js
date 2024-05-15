@@ -1,4 +1,9 @@
-const { errorMessage, shuffleArray, sendDM, gameStateMessage } = require("../message-helpers");
+const {
+  errorMessage,
+  shuffleArray,
+  sendDM,
+  gameStateMessage,
+} = require("../message-helpers");
 
 async function execute(message, args, user) {
   const channels = await game_info.get("game_channels");
@@ -18,6 +23,9 @@ async function execute(message, args, user) {
       } else {
         current_game.players.push({ id: message.author.id });
       }
+      const player_games = await game_info.get("player_games");
+      player_games[message.author.id] = channels[message.channel.id];
+      game_info.set("player_games", player_games);
       if (current_game.players.length === 7) {
         current_game.gameState.phase = "nomWait";
         current_game.gameState.presidentId = 0;
@@ -53,11 +61,11 @@ async function execute(message, args, user) {
             }
           }
         }
-        gameStateMessage(message,current_game);
+        gameStateMessage(message, current_game);
       }
       await game_info.set("games", games);
     } else {
-      if ( current_game.gameState.phase !== "joinWait" ) {
+      if (current_game.gameState.phase !== "joinWait") {
         message.channel.send(errorMessage("Game already started!"));
       } else {
         message.channel.send(errorMessage("Already joined game!"));

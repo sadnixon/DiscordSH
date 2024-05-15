@@ -18,7 +18,6 @@ async function execute(message, args, user) {
       current_game.players[current_game.gameState.presidentId].id ===
         message.author.id
     ) {
-      console.log(current_game.gameState);
       current_game.gameState.phase = "chancWait";
       current_game.gameState.discard.push(
         current_game.gameState.presidentHand.splice(
@@ -36,7 +35,6 @@ async function execute(message, args, user) {
         )}**. Please choose a card to play.`,
         current_game.players[current_game.gameState.chancellorId].id
       );
-      console.log(current_game.gameState);
       await game_info.set("games", games);
     } else {
       message.channel.send(errorMessage("Invalid discard pick!"));

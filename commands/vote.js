@@ -81,6 +81,8 @@ async function execute(message, args, user) {
             } else {
               current_game.gameState.fas++;
             }
+            current_game.gameState.lastPresidentId = -1;
+            current_game.gameState.lastChancellorId = -1;
             if (current_game.gameState.deck.length < 3) {
               current_game.gameState.deck = shuffleArray(
                 current_game.gameState.deck.concat(

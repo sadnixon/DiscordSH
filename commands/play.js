@@ -18,7 +18,6 @@ async function execute(message, args, user) {
       current_game.players[current_game.gameState.chancellorId].id ===
         message.author.id
     ) {
-      console.log(current_game.gameState);
       current_game.gameState.chancellorHand.splice(
         current_game.gameState.chancellorHand.indexOf(args[0]),
         1
@@ -47,7 +46,24 @@ async function execute(message, args, user) {
         //GOTTA IMPLEMENT GAME ENDING STUFF HERE EVENTUALLY
       } else {
         current_game.gameState.fas++;
-        if (current_game.gameState.fas === 2) {
+        if (current_game.gameState.fas === 1) {
+          current_game.gameState.phase = "nomWait";
+          current_game.gameState.lastPresidentId =
+            current_game.gameState.presidentId;
+          current_game.gameState.lastChancellorId =
+            current_game.gameState.chancellorId;
+          current_game.gameState.presidentId =
+            (current_game.gameState.presidentId + 1) % 7;
+          while (
+            current_game.gameState.deadPlayers.includes(
+              current_game.gameState.presidentId
+            )
+          ) {
+            current_game.gameState.presidentId =
+              (current_game.gameState.presidentId + 1) % 7;
+          }
+          current_game.gameState.chancellorId = -1;
+        } else if (current_game.gameState.fas === 2) {
           current_game.gameState.phase = "investWait";
         } else if (current_game.gameState.fas === 3) {
           current_game.gameState.phase = "seWait";
@@ -56,7 +72,6 @@ async function execute(message, args, user) {
         }
         //GOTTA IMPLEMENT GAME ENDING STUFF HERE EVENTUALLY
       }
-      console.log(current_game.gameState);
       gameStateMessage(message, current_game);
       await game_info.set("games", games);
     } else {

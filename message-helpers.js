@@ -84,6 +84,76 @@ async function sendDM(message, game, dmText, id) {
   });
 }
 
+async function checkGameEnd(message, game) {
+  if (
+    !(
+      game.gameState.lib === 5 ||
+      game.gameState.fas === 6 ||
+      game.gameState.hitlerElected ||
+      game.gameState.hitlerDead
+    )
+  ) {
+    return;
+  }
+  let end_method;
+  if (game.gameState.lib === 5) {
+    end_method = "Five liberal policies were enacted! Liberals win!";
+  } else if (game.gameState.fas === 6) {
+    end_method = "Six fascist policies were enacted! Fascists win!";
+  } else if (game.gameState.hitlerElected) {
+    end_method = "Hitler was elected Chancellor! Fascists win!";
+  } else if (game.gameState.hitlerDead) {
+    end_method = "Hitler was executed! Liberals win!";
+  }
+  const deads = _.range(0, game.players.length).map((i) =>
+    game.gameState.deadPlayers.includes(i) ? "~~" : ""
+  );
+  let guild;
+  let channel;
+  if (message.channel.type === "dm") {
+    guild = await client.guilds.cache.get(game.guild_id);
+    channel = await guild.channels.cache.get(game.channel_id);
+  } else {
+    guild = await message.guild;
+    channel = await message.channel;
+  }
+  const embed = new Discord.MessageEmbed()
+    .setTitle(end_method)
+    .setDescription(
+      `${game.players
+        .map(
+          (player) =>
+            `${deads[player.seat]}${player.seat}\\. <@${player.id}>:${
+              deads[player.seat]
+            } ${player.role}`
+        )
+        .join("\n")}`
+    )
+    .setFooter("GG everybody!");
+  channel.send(embed);
+  const player_channels = await game_info.get("player_channels");
+  for (let i = 0; i < game.players.length; i++) {
+    let result;
+    if (game.gameState.lib === 5 || game.gameState.hitlerDead) {
+      result = game.players[i].role === "liberal" ? "won!" : "lost.";
+    } else if (game.gameState.fas === 6 || game.gameState.hitlerElected) {
+      result = game.players[i].role === "liberal" ? "lost." : "won!";
+    }
+    sendDM(
+      message,
+      game,
+      `**${end_method}** Since your role is **${players[i].role}**, you ${result}`,
+      game.players[i].id
+    );
+    delete player_channels[game.players[i].id];
+  }
+  game.gameState.phase = "done";
+  const channels = await game_info.get("game_channels");
+  delete channels[game.channel_id];
+  await game_info.set("game_channels");
+  await game_info.set("player_channels");
+}
+
 const advancePres = (game) => {
   if (game.gameState.specialElected > -1) {
     game.gameState.presidentId =
@@ -100,38 +170,6 @@ const advancePres = (game) => {
   game.gameState.chancellorId = -1;
 };
 
-const rank = (competitorList, column, secondary = false, limit = 10) => {
-  // assume competitorList is sorted by column
-  // returns rank of each competitor (i and j have the same rank if i[column] === j[column])
-  const ranks = [];
-  let lastRank = 1;
-  let lastScore = -1;
-  let lastSecondary = -1;
-  let reachedLimit = false;
-  competitorList.forEach((p, i) => {
-    if (reachedLimit) {
-      return;
-    }
-    if (p[column] !== lastScore) {
-      lastRank = i + 1;
-      if (lastRank > limit) {
-        reachedLimit = true;
-        return;
-      }
-    } else if (p[secondary] !== lastSecondary) {
-      lastRank = i + 1;
-      if (lastRank > limit) {
-        reachedLimit = true;
-        return;
-      }
-    }
-    ranks.push(lastRank);
-    lastScore = p[column];
-    lastSecondary = p[secondary];
-  });
-  return ranks;
-};
-
 const shuffleArray = (array) => {
   for (let i = array.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
@@ -142,16 +180,11 @@ const shuffleArray = (array) => {
   return array;
 };
 
-const roundToThirds = (points) => {
-  return +(Math.round(points * 12) / 12).toFixed(2);
-};
-
 module.exports = {
   errorMessage,
-  rank,
-  roundToThirds,
   shuffleArray,
   sendDM,
   gameStateMessage,
   advancePres,
+  checkGameEnd,
 };

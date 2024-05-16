@@ -3,6 +3,7 @@ const {
   gameStateMessage,
   sendDM,
   advancePres,
+  checkGameEnd,
 } = require("../message-helpers");
 const _ = require("lodash");
 
@@ -21,6 +22,9 @@ async function execute(message, args, user) {
         message.author.id
     ) {
       current_game.gameState.deadPlayers.push(parseInt(args[0]));
+      if (current_game.gameState.players[parseInt(args[0])].role === "hitler") {
+        current_game.gameState.hitlerDead = true;
+      }
       //GOTTA IMPLEMENT GAME ENDING STUFF HERE
       current_game.gameState.phase = "nomWait";
       current_game.gameState.lastPresidentId =
@@ -30,6 +34,7 @@ async function execute(message, args, user) {
       advancePres(current_game);
       await game_info.set("games", games);
       gameStateMessage(message, current_game);
+      checkGameEnd(message,current_game);
     } else {
       message.channel.send(errorMessage("Invalid execution pick!"));
     }

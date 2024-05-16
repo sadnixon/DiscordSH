@@ -4,6 +4,7 @@ const {
   sendDM,
   gameStateMessage,
   advancePres,
+  checkGameEnd,
 } = require("../message-helpers");
 const _ = require("lodash");
 
@@ -52,6 +53,14 @@ async function execute(message, args, user) {
           vote_list.filter((e) => e !== null).length / 2
         ) {
           //current_game.gameState.failedGovs = 0;
+          if (
+            current_game.gameState.fas >=
+              current_game.customGameSettings.hitlerZone &&
+            current_game.gameState.players[current_game.gameState.chancellorId]
+              .role === "hitler"
+          ) {
+            current_game.gameState.hitlerElected = true;
+          }
           current_game.gameState.phase = "presWait";
           for (let i = 0; i < 3; i++) {
             current_game.gameState.presidentHand.push(
@@ -95,6 +104,7 @@ async function execute(message, args, user) {
         for (let i = 0; i < current_game.players.length; i++) {
           current_game.gameState.votes[i] = null;
         }
+        checkGameEnd(message,current_game);
       }
       await game_info.set("games", games);
     } else {

@@ -4,6 +4,7 @@ const {
   sendDM,
   gameStateMessage,
   advancePres,
+  checkGameEnd,
 } = require("../message-helpers");
 const _ = require("lodash");
 
@@ -119,6 +120,7 @@ async function execute(message, args, user) {
         gameStateMessage(message, current_game);
         current_game.gameState.presidentVeto = null;
         current_game.gameState.chancellorVeto = null;
+        checkGameEnd(message,current_game);
       }
       await game_info.set("games", games);
     } else {

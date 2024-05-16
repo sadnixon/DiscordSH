@@ -4,6 +4,7 @@ const {
   sendDM,
   gameStateMessage,
   advancePres,
+  checkGameEnd,
 } = require("../message-helpers");
 const _ = require("lodash");
 
@@ -62,6 +63,7 @@ async function execute(message, args, user) {
       }
       gameStateMessage(message, current_game);
       await game_info.set("games", games);
+      checkGameEnd(message,current_game);
     } else {
       message.channel.send(errorMessage("Invalid play pick!"));
     }

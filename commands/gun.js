@@ -22,7 +22,7 @@ async function execute(message, args, user) {
         message.author.id
     ) {
       current_game.gameState.deadPlayers.push(parseInt(args[0]));
-      if (current_game.gameState.players[parseInt(args[0])].role === "hitler") {
+      if (current_game.players[parseInt(args[0])].role === "hitler") {
         current_game.gameState.hitlerDead = true;
       }
       //GOTTA IMPLEMENT GAME ENDING STUFF HERE

@@ -56,7 +56,7 @@ async function execute(message, args, user) {
           if (
             current_game.gameState.fas >=
               current_game.customGameSettings.hitlerZone &&
-            current_game.gameState.players[current_game.gameState.chancellorId]
+            current_game.players[current_game.gameState.chancellorId]
               .role === "hitler"
           ) {
             current_game.gameState.hitlerElected = true;

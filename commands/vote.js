@@ -51,7 +51,7 @@ async function execute(message, args, user) {
           vote_list.filter((e) => e).length >
           vote_list.filter((e) => e !== null).length / 2
         ) {
-          current_game.gameState.failedGovs = 0;
+          //current_game.gameState.failedGovs = 0;
           current_game.gameState.phase = "presWait";
           for (let i = 0; i < 3; i++) {
             current_game.gameState.presidentHand.push(

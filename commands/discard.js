@@ -27,12 +27,31 @@ async function execute(message, args, user) {
       );
       current_game.gameState.chancellorHand =
         current_game.gameState.presidentHand.splice(0, 2);
+      let dmText;
+      if (
+        current_game.gameState.fas >= current_game.customGameSettings.vetoZone
+      ) {
+        current_game.gameState.phase = "vetoWait";
+        dmText = `You have been passed **${current_game.gameState.chancellorHand.join(
+          ""
+        )}**. Vote Ja to veto playing either of these policies, or vote Nein to select a policy to play.`;
+        sendDM(
+          message,
+          current_game,
+          `You passed your chancellor **${current_game.gameState.chancellorHand.join(
+            ""
+          )}**. Vote Ja to veto playing either of these policies, or vote Nein to allow your chancellor to select a policy.`,
+          message.author.id
+        );
+      } else {
+        dmText = `You have been passed **${current_game.gameState.chancellorHand.join(
+          ""
+        )}**. Please choose a card to play.`;
+      }
       sendDM(
         message,
         current_game,
-        `You have been passed **${current_game.gameState.chancellorHand.join(
-          ""
-        )}**. Please choose a card to play.`,
+        dmText,
         current_game.players[current_game.gameState.chancellorId].id
       );
       await game_info.set("games", games);

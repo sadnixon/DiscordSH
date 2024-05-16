@@ -19,6 +19,7 @@ async function execute(message, args, user) {
       current_game.players[current_game.gameState.chancellorId].id ===
         message.author.id
     ) {
+      current_game.gameState.failedGovs = 0;
       current_game.gameState.chancellorHand.splice(
         current_game.gameState.chancellorHand.indexOf(args[0]),
         1

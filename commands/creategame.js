@@ -61,6 +61,7 @@ async function execute(message, args, user) {
         chancellorVeto: null,
         phase: "joinWait",
         deadPlayers: [],
+        invPlayers: [],
         hitlerElected: false,
         hitlerDead: false,
         log: {},

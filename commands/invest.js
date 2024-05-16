@@ -16,6 +16,7 @@ async function execute(message, args, user) {
       _.range(0, current_game.players.length).includes(parseInt(args[0])) &&
       current_game.gameState.presidentId !== parseInt(args[0]) &&
       !current_game.gameState.deadPlayers.includes(parseInt(args[0])) &&
+      !current_game.gameState.invPlayers.includes(parseInt(args[0])) &&
       current_game.gameState.phase === "investWait" &&
       current_game.players[current_game.gameState.presidentId].id ===
         message.author.id
@@ -33,6 +34,7 @@ async function execute(message, args, user) {
         message.author.id
       );
       current_game.gameState.phase = "nomWait";
+      current_game.gameState.invPlayers.push(parseInt(args[0]));
       current_game.gameState.lastPresidentId =
         current_game.gameState.presidentId;
       current_game.gameState.lastChancellorId =

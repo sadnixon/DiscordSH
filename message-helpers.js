@@ -35,7 +35,7 @@ const gameStateMessage = (message, game) => {
       ? "Nein"
       : ""
   );
-  const cutoffs = [0,1,3,6,8,10,12];
+  const cutoffs = [0, 1, 3, 6, 8, 10, 12];
 
   const embed = new Discord.MessageEmbed()
     .setTitle("Gamestate Update")
@@ -49,9 +49,9 @@ const gameStateMessage = (message, game) => {
       )}\n\n${game.players
         .map(
           (player) =>
-            `${deads[player.seat]}${player.seat}\\. <@${player.id}> ${
-              pres[player.seat]
-            }${chanc[player.seat]} ${TL[player.seat]} ${votes[player.seat]}${
+            `${deads[player.seat]}${votes[player.seat]} ${player.seat}\\. <@${
+              player.id
+            }> ${pres[player.seat]}${chanc[player.seat]}${TL[player.seat]}${
               deads[player.seat]
             }`
         )
@@ -86,13 +86,16 @@ async function sendDM(message, game, dmText, id) {
 
 const advancePres = (game) => {
   if (game.gameState.specialElected > -1) {
-    game.gameState.presidentId = (game.gameState.specialElected + 1) % game.players.length;
+    game.gameState.presidentId =
+      (game.gameState.specialElected + 1) % game.players.length;
     game.gameState.specialElected = -1;
   } else {
-    game.gameState.presidentId = (game.gameState.presidentId + 1) % game.players.length;
+    game.gameState.presidentId =
+      (game.gameState.presidentId + 1) % game.players.length;
   }
   while (game.gameState.deadPlayers.includes(game.gameState.presidentId)) {
-    game.gameState.presidentId = (game.gameState.presidentId + 1) %game.players.length;
+    game.gameState.presidentId =
+      (game.gameState.presidentId + 1) % game.players.length;
   }
   game.gameState.chancellorId = -1;
 };

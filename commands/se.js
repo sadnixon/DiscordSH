@@ -20,7 +20,8 @@ async function execute(message, args, user) {
         message.author.id
     ) {
       current_game.gameState.phase = "nomWait";
-      current_game.gameState.specialElected = true;
+      current_game.gameState.specialElected =
+        current_game.gameState.presidentId;
       current_game.gameState.lastPresidentId =
         current_game.gameState.presidentId;
       current_game.gameState.lastChancellorId =

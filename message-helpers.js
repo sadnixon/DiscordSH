@@ -6,49 +6,50 @@ const errorMessage = (message) => {
 };
 
 const gameStateMessage = (message, game) => {
-  const deads = _.range(0, 7).map((i) =>
+  const deads = _.range(0, game.players.length).map((i) =>
     game.gameState.deadPlayers.includes(i) ? "~~" : ""
   );
-  const pres = _.range(0, 7).map((i) =>
+  const pres = _.range(0, game.players.length).map((i) =>
     game.gameState.presidentId === i ? "(P)" : ""
   );
-  const chanc = _.range(0, 7).map((i) =>
+  const chanc = _.range(0, game.players.length).map((i) =>
     game.gameState.chancellorId === i ? "(C)" : ""
   );
   var TL;
   if (game.players.length - game.gameState.deadPlayers.length > 5) {
-    TL = _.range(0, 7).map((i) =>
+    TL = _.range(0, game.players.length).map((i) =>
       game.gameState.lastPresidentId === i ||
       game.gameState.lastChancellorId === i
         ? "(TL)"
         : ""
     );
   } else {
-    TL = _.range(0, 7).map((i) =>
+    TL = _.range(0, game.players.length).map((i) =>
       game.gameState.lastChancellorId === i ? "(TL)" : ""
     );
   }
-  const votes = _.range(0, 7).map((i) =>
+  const votes = _.range(0, game.players.length).map((i) =>
     game.gameState.votes[i]
       ? "Ja"
       : game.gameState.votes[i] === false
       ? "Nein"
       : ""
   );
+  const cutoffs = [0,1,3,6,8,10,12];
 
   const embed = new Discord.MessageEmbed()
     .setTitle("Gamestate Update")
     .setDescription(
-      `${"🟦".repeat(game.gameState.lib)}${"⬛".repeat(
-        5 - game.gameState.lib
+      `${"🟦".repeat(game.gameState.lib)}${"⬛⬛⬛⬛🕊️".slice(
+        game.gameState.lib
       )}\n${"⭕".repeat(game.gameState.failedGovs)}${"⚫".repeat(
         3 - game.gameState.failedGovs
-      )}\n${"🟥".repeat(game.gameState.fas)}${"⬛🔎🗳️🔫🔫⬛".slice(
-        game.gameState.fas
+      )}\n${"🟥".repeat(game.gameState.fas)}${"⬛🔎🗳️🔫🔫💀".slice(
+        cutoffs[game.gameState.fas]
       )}\n\n${game.players
         .map(
           (player) =>
-            `${deads[player.seat]}${player.seat}. <@${player.id}> ${
+            `${deads[player.seat]}${player.seat}\\. <@${player.id}> ${
               pres[player.seat]
             }${chanc[player.seat]} ${TL[player.seat]} ${votes[player.seat]}${
               deads[player.seat]
@@ -84,14 +85,14 @@ async function sendDM(message, game, dmText, id) {
 }
 
 const advancePres = (game) => {
-  if (game.gameState.specialElected) {
-    game.gameState.presidentId = (game.gameState.lastPresidentId + 1) % 7;
-    game.gameState.specialElected = false;
+  if (game.gameState.specialElected > -1) {
+    game.gameState.presidentId = (game.gameState.specialElected + 1) % game.players.length;
+    game.gameState.specialElected = -1;
   } else {
-    game.gameState.presidentId = (game.gameState.presidentId + 1) % 7;
+    game.gameState.presidentId = (game.gameState.presidentId + 1) % game.players.length;
   }
   while (game.gameState.deadPlayers.includes(game.gameState.presidentId)) {
-    game.gameState.presidentId = (game.gameState.presidentId + 1) % 7;
+    game.gameState.presidentId = (game.gameState.presidentId + 1) %game.players.length;
   }
   game.gameState.chancellorId = -1;
 };

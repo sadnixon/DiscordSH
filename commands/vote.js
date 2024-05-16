@@ -40,7 +40,7 @@ async function execute(message, args, user) {
 
       if (
         vote_list.filter((e) => e !== null).length ===
-        current_game.players.length + current_game.gameState.deadPlayers.length
+        current_game.players.length - current_game.gameState.deadPlayers.length
       ) {
         current_game.gameState.log.votes = vote_list;
         current_game.gameState.log.presidentId =

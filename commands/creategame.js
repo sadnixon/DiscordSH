@@ -33,7 +33,7 @@ async function execute(message, args, user) {
         lib: 0,
         fas: 0,
         failedGovs: 0,
-        specialElected: false,
+        specialElected: -1,
         deck: shuffleArray([
           "R", "R", "R", "R",
           "R", "R", "R", "R",
@@ -66,10 +66,6 @@ async function execute(message, args, user) {
         log: {},
       },
     };
-    //const roles = shuffleArray(["liberal","liberal","liberal","liberal","fascist","fascist","hitler"]);
-    //for (let i = 0; i < 7; i++) {
-    //  games[game_id]["players"].push({"role": roles[i], "seat": i});
-    //}
     await game_info.set("game_channels", channels);
     await game_info.set("games", games);
   }

@@ -35,13 +35,14 @@ const gameStateMessage = (message, game) => {
       ? "Nein"
       : ""
   );
+  const lib_cutoffs = [0, 1, 2, 3, 4, 7];
   const cutoffs = [0, 1, 3, 6, 8, 10, 12];
 
   const embed = new Discord.MessageEmbed()
     .setTitle("Gamestate Update")
     .setDescription(
       `${"🟦".repeat(game.gameState.lib)}${"⬛⬛⬛⬛🕊️".slice(
-        game.gameState.lib
+        lib_cutoffs[game.gameState.lib]
       )}\n${"⭕".repeat(game.gameState.failedGovs)}${"⚫".repeat(
         3 - game.gameState.failedGovs
       )}\n${"🟥".repeat(game.gameState.fas)}${"⬛🔎🗳️🔫🔫💀".slice(
@@ -131,7 +132,7 @@ async function checkGameEnd(message, game) {
     )
     .setFooter("GG everybody!");
   channel.send(embed);
-  const player_channels = await game_info.get("player_channels");
+  const player_games = await game_info.get("player_games");
   for (let i = 0; i < game.players.length; i++) {
     let result;
     if (game.gameState.lib === 5 || game.gameState.hitlerDead) {
@@ -142,16 +143,16 @@ async function checkGameEnd(message, game) {
     sendDM(
       message,
       game,
-      `**${end_method}** Since your role is **${players[i].role}**, you ${result}`,
+      `**${end_method}** Since your role is **${game.players[i].role}**, you ${result}`,
       game.players[i].id
     );
-    delete player_channels[game.players[i].id];
+    delete player_games[game.players[i].id];
   }
   game.gameState.phase = "done";
   const channels = await game_info.get("game_channels");
   delete channels[game.channel_id];
-  await game_info.set("game_channels");
-  await game_info.set("player_channels");
+  await game_info.set("game_channels", channels);
+  await game_info.set("player_games", player_games);
 }
 
 const advancePres = (game) => {

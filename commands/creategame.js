@@ -18,10 +18,6 @@ async function execute(message, args, user) {
       return;
     }
 
-    const games = await game_info.get("games");
-    const game_id = message.channel.id.toString() + "_" + Date.now().toString();
-    channels[message.channel.id] = game_id;
-
     if (playerCount === 5 || playerCount === 6) {
       powers = [null, null, "peek", "bullet", "bullet"];
     } else if (playerCount === 9 || playerCount === 10) {
@@ -30,7 +26,9 @@ async function execute(message, args, user) {
       powers = [null, "investigate", "election", "bullet", "bullet"];
     }
 
-    games[game_id] = {
+    const game_id = message.channel.id.toString() + "_" + Date.now().toString();
+    channels[message.channel.id] = game_id;
+    const game_data = {
       customGameSettings: {
         deckState: { lib: 6, fas: 11 },
         trackState: { lib: 0, fas: 0 },
@@ -50,6 +48,7 @@ async function execute(message, args, user) {
       players: [],
       logs: [],
       player_ids: {},
+      game_id: game_id,
       guild_id: message.guild.id,
       channel_id: message.channel.id,
       gameState: {
@@ -82,9 +81,8 @@ async function execute(message, args, user) {
         log: {},
       },
     };
-    
     await game_info.set("game_channels", channels);
-    await game_info.set("games", games);
+    await game_info.set(game_id, game_data);
 
     message.channel.send(`Game created for ${playerCount} players!`);
   } else {

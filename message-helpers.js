@@ -153,6 +153,10 @@ async function checkGameEnd(message, game) {
   delete channels[game.channel_id];
   await game_info.set("game_channels", channels);
   await game_info.set("player_games", player_games);
+  const games = await game_info.get("games");
+  games[current_game.game_id] = current_game;
+  await game_info.set("games", games);
+  await game_info.delete(current_game.game_id);
 }
 
 const advancePres = (game) => {

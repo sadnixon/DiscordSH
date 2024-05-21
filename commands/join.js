@@ -8,8 +8,8 @@ const {
 async function execute(message, args, user) {
   const channels = await game_info.get("game_channels");
   if (message.channel.id in channels) {
-    const games = await game_info.get("games");
-    const current_game = games[channels[message.channel.id]];
+    const current_game = await game_info.get(channels[message.channel.id]);
+
     if (
       current_game.gameState.phase === "joinWait" &&
       !current_game.players
@@ -39,7 +39,7 @@ async function execute(message, args, user) {
       if ([5, 6, 7, 8, 9, 10].includes(playerCount)) {
         current_game.gameState.phase = "nomWait";
         current_game.gameState.presidentId = 0;
-        await game_info.set("games", games);
+        await game_info.set(current_game.game_id, current_game);
         current_game.players = shuffleArray(current_game.players);
         
         const roleConfigs = {
@@ -79,7 +79,7 @@ async function execute(message, args, user) {
         }
         gameStateMessage(message, current_game);
       }
-      await game_info.set("games", games);
+      await game_info.set(current_game.game_id, current_game);
     } else {
       if (current_game.gameState.phase !== "joinWait") {
         message.channel.send(errorMessage("Game already started!"));

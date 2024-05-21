@@ -17,7 +17,7 @@ async function execute(message, args, user) {
         .includes(message.author.id)
     ) {
       if (args && args[0] === "test") {
-        for (let i = 0; i < game_info.playerCount; i++) {
+        for (let i = 0; i < current_game.playerCount; i++) {
           current_game.players.push({ id: message.author.id });
         }
       } else {
@@ -28,7 +28,7 @@ async function execute(message, args, user) {
       player_games[message.author.id] = channels[message.channel.id];
       game_info.set("player_games", player_games);
       
-      if (game_info.players.length === game_info.playerCount) {
+      if (current_game.players.length === current_game.playerCount) {
         current_game.gameState.phase = "nomWait";
         current_game.gameState.presidentId = 0;
         await game_info.set(current_game.game_id, current_game);
@@ -43,9 +43,9 @@ async function execute(message, args, user) {
           10: ["liberal", "liberal", "liberal", "liberal", "liberal", "liberal", "fascist", "fascist", "fascist", "hitler"]
         };
         
-        const roles = shuffleArray(roleConfigs[game_info.playerCount]);
+        const roles = shuffleArray(roleConfigs[current_game.playerCount]);
         
-        for (let i = 0; i < game_info.playerCount; i++) {
+        for (let i = 0; i < current_game.playerCount; i++) {
           current_game.players[i].role = roles[i];
           current_game.players[i].seat = i;
           current_game.player_ids[current_game.players[i].id] = i;
@@ -57,7 +57,7 @@ async function execute(message, args, user) {
           );
           
           if (roles[i] === "fascist") {
-            for (let j = 0; j < game_info.playerCount; j++) {
+            for (let j = 0; j < current_game.playerCount; j++) {
               if (i !== j && roles[j] !== "liberal") {
                 sendDM(
                   message,

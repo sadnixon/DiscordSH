@@ -47,6 +47,7 @@ async function execute(message, args, user) {
       },
       players: [],
       logs: [],
+      playerCount: playerCount,
       player_ids: {},
       game_id: game_id,
       guild_id: message.guild.id,

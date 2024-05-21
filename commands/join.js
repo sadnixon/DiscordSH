@@ -16,19 +16,11 @@ async function execute(message, args, user) {
         .map((player) => player.id)
         .includes(message.author.id)
     ) {
-      let playerCount;
       if (args && args[0] === "test") {
-        playerCount = 7; // For testing purposes
+        for (let i = 0; i < game_info.playerCount; i++) {
+          current_game.players.push({ id: message.author.id });
+        }
       } else {
-        playerCount = parseInt(args[0], 10); // Get player count from command arguments
-      }
-      
-      if (isNaN(playerCount) || playerCount < 5 || playerCount > 10) {
-        message.channel.send(errorMessage("Invalid player count. Please specify a number between 5 and 10."));
-        return;
-      }
-
-      for (let i = 0; i < playerCount; i++) {
         current_game.players.push({ id: message.author.id });
       }
       
@@ -36,7 +28,7 @@ async function execute(message, args, user) {
       player_games[message.author.id] = channels[message.channel.id];
       game_info.set("player_games", player_games);
       
-      if ([5, 6, 7, 8, 9, 10].includes(playerCount)) {
+      if (game_info.players.length === game_info.playerCount) {
         current_game.gameState.phase = "nomWait";
         current_game.gameState.presidentId = 0;
         await game_info.set(current_game.game_id, current_game);
@@ -51,9 +43,9 @@ async function execute(message, args, user) {
           10: ["liberal", "liberal", "liberal", "liberal", "liberal", "liberal", "fascist", "fascist", "fascist", "hitler"]
         };
         
-        const roles = shuffleArray(roleConfigs[playerCount]);
+        const roles = shuffleArray(roleConfigs[game_info.playerCount]);
         
-        for (let i = 0; i < playerCount; i++) {
+        for (let i = 0; i < game_info.playerCount; i++) {
           current_game.players[i].role = roles[i];
           current_game.players[i].seat = i;
           current_game.player_ids[current_game.players[i].id] = i;
@@ -65,7 +57,7 @@ async function execute(message, args, user) {
           );
           
           if (roles[i] === "fascist") {
-            for (let j = 0; j < playerCount; j++) {
+            for (let j = 0; j < game_info.playerCount; j++) {
               if (i !== j && roles[j] !== "liberal") {
                 sendDM(
                   message,

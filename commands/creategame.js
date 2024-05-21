@@ -27,7 +27,7 @@ async function execute(message, args, user) {
     } else if (playerCount === 9 || playerCount === 10) {
       powers = ["investigate", "investigate", "election", "bullet", "bullet"];
     } else {
-      powers = ["investigate", "investigate", "election", "bullet", "bullet"];
+      powers = [null, "investigate", "election", "bullet", "bullet"];
     }
 
     games[game_id] = {

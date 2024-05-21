@@ -16,31 +16,44 @@ async function execute(message, args, user) {
         .map((player) => player.id)
         .includes(message.author.id)
     ) {
+      let playerCount;
       if (args && args[0] === "test") {
-        for (let i = 0; i < 7; i++) {
-          current_game.players.push({ id: message.author.id });
-        }
+        playerCount = 7; // For testing purposes
       } else {
+        playerCount = parseInt(args[0], 10); // Get player count from command arguments
+      }
+      
+      if (isNaN(playerCount) || playerCount < 5 || playerCount > 10) {
+        message.channel.send(errorMessage("Invalid player count. Please specify a number between 5 and 10."));
+        return;
+      }
+
+      for (let i = 0; i < playerCount; i++) {
         current_game.players.push({ id: message.author.id });
       }
+      
       const player_games = await game_info.get("player_games");
       player_games[message.author.id] = channels[message.channel.id];
       game_info.set("player_games", player_games);
-      if (current_game.players.length === 7) {
+      
+      if ([5, 6, 7, 8, 9, 10].includes(playerCount)) {
         current_game.gameState.phase = "nomWait";
         current_game.gameState.presidentId = 0;
         await game_info.set(current_game.game_id, current_game);
         current_game.players = shuffleArray(current_game.players);
-        const roles = shuffleArray([
-          "liberal",
-          "liberal",
-          "liberal",
-          "liberal",
-          "fascist",
-          "fascist",
-          "hitler",
-        ]);
-        for (let i = 0; i < 7; i++) {
+        
+        const roleConfigs = {
+          5: ["liberal", "liberal", "liberal", "fascist", "hitler"],
+          6: ["liberal", "liberal", "liberal", "liberal", "fascist", "hitler"],
+          7: ["liberal", "liberal", "liberal", "liberal", "fascist", "fascist", "hitler"],
+          8: ["liberal", "liberal", "liberal", "liberal", "liberal", "fascist", "fascist", "hitler"],
+          9: ["liberal", "liberal", "liberal", "liberal", "liberal", "fascist", "fascist", "fascist", "hitler"],
+          10: ["liberal", "liberal", "liberal", "liberal", "liberal", "liberal", "fascist", "fascist", "fascist", "hitler"]
+        };
+        
+        const roles = shuffleArray(roleConfigs[playerCount]);
+        
+        for (let i = 0; i < playerCount; i++) {
           current_game.players[i].role = roles[i];
           current_game.players[i].seat = i;
           current_game.player_ids[current_game.players[i].id] = i;
@@ -50,8 +63,9 @@ async function execute(message, args, user) {
             `Your seat is **${i}** and your role is **${roles[i]}**`,
             current_game.players[i].id
           );
+          
           if (roles[i] === "fascist") {
-            for (let j = 0; j < 7; j++) {
+            for (let j = 0; j < playerCount; j++) {
               if (i !== j && roles[j] !== "liberal") {
                 sendDM(
                   message,

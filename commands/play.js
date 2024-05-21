@@ -39,18 +39,22 @@ async function execute(message, args, user) {
         //GOTTA IMPLEMENT GAME ENDING STUFF HERE EVENTUALLY
       } else {
         current_game.gameState.fas++;
-        if (current_game.gameState.fas === 1) {
+        const power_slot = current_game.customGameSettings.powers[current_game.gameState.fas - 1];
+
+        if (power_slot === null) {
           current_game.gameState.phase = "nomWait";
           current_game.gameState.lastPresidentId =
             current_game.gameState.presidentId;
           current_game.gameState.lastChancellorId =
             current_game.gameState.chancellorId;
           advancePres(current_game);
-        } else if (current_game.gameState.fas === 2) {
+        } else if (power_slot === "investigate") {
           current_game.gameState.phase = "investWait";
-        } else if (current_game.gameState.fas === 3) {
+        } else if (power_slot === "peek") {
+          current_game.gameState.phase = "peekWait";
+        } else if (power_slot === "election") {
           current_game.gameState.phase = "seWait";
-        } else if ([4, 5].includes(current_game.gameState.fas)) {
+        } else if (power_slot === "bullet") {
           current_game.gameState.phase = "gunWait";
         }
         //GOTTA IMPLEMENT GAME ENDING STUFF HERE EVENTUALLY

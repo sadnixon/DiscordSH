@@ -42,9 +42,9 @@ async function execute(message, args, user) {
         hitKnowsFas: playerCount < 7,
       },
       gameSetting: {
-        rebalance6p: playerCount === 6,
-        rebalance7p: playerCount === 7,
-        rebalance9p: playerCount === 9,
+        rebalance6p: false,
+        rebalance7p: false,
+        rebalance9p: false,
         casualGame: true,
       },
       players: [],

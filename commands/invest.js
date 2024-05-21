@@ -9,8 +9,8 @@ const _ = require("lodash");
 async function execute(message, args, user) {
   const channels = await game_info.get("game_channels");
   if (message.channel.id in channels) {
-    const games = await game_info.get("games");
-    const current_game = games[channels[message.channel.id]];
+    const current_game = await game_info.get(channels[message.channel.id]);
+
     if (
       args &&
       _.range(0, current_game.players.length).includes(parseInt(args[0])) &&
@@ -40,7 +40,7 @@ async function execute(message, args, user) {
       current_game.gameState.lastChancellorId =
         current_game.gameState.chancellorId;
       advancePres(current_game);
-      await game_info.set("games", games);
+      await game_info.set(current_game.game_id, current_game);
       gameStateMessage(message, current_game);
     } else {
       message.channel.send(errorMessage("Invalid investigation pick!"));

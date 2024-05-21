@@ -4,10 +4,9 @@ const { errorMessage, shuffleArray } = require("../message-helpers");
 async function execute(message, args, user) {
   const channels = await game_info.get("game_channels");
   if (!(message.channel.id in channels)) {
-    const games = await game_info.get("games");
     const game_id = message.channel.id.toString() + "_" + Date.now().toString();
     channels[message.channel.id] = game_id;
-    games[game_id] = {
+    const game_data = {
       customGameSettings: {
         deckState: { lib: 6, fas: 11 },
         trackState: { lib: 0, fas: 0 },
@@ -27,6 +26,7 @@ async function execute(message, args, user) {
       players: [],
       logs: [],
       player_ids: {},
+      game_id: game_id,
       guild_id: message.guild.id,
       channel_id: message.channel.id,
       gameState: {
@@ -67,8 +67,8 @@ async function execute(message, args, user) {
         log: {},
       },
     };
+    await game_info.set(game_id, game_data);
     await game_info.set("game_channels", channels);
-    await game_info.set("games", games);
   }
   message.channel.send("Game Made!");
 }

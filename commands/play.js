@@ -11,8 +11,7 @@ const _ = require("lodash");
 async function execute(message, args, user) {
   const player_games = await game_info.get("player_games");
   if (message.author.id in player_games) {
-    const games = await game_info.get("games");
-    const current_game = games[player_games[message.author.id]];
+    const current_game = await game_info.get(player_games[message.author.id]);
     if (
       args &&
       current_game.gameState.phase === "chancWait" &&
@@ -66,7 +65,7 @@ async function execute(message, args, user) {
         current_game.gameState.discard = [];
       }
       gameStateMessage(message, current_game);
-      await game_info.set("games", games);
+      await game_info.set(current_game.game_id, current_game);
       checkGameEnd(message,current_game);
     } else {
       message.channel.send(errorMessage("Invalid play pick!"));

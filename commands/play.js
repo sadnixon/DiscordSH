@@ -62,7 +62,7 @@ async function execute(message, args, user) {
             current_game,
             `You have peeked at **${peek_draw.join(
               ""
-            )}** in that order (top on the right).`,
+            )}** in that order (top on the left).`,
             current_game.players[current_game.gameState.presidentId].id
           );
           current_game.gameState.phase = "nomWait";

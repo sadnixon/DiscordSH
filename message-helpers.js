@@ -35,19 +35,28 @@ const gameStateMessage = (message, game) => {
       ? "Nein"
       : ""
   );
-  const lib_cutoffs = [0, 1, 2, 3, 4, 7];
-  const cutoffs = [0, 1, 3, 6, 8, 10, 12];
+
+  const emojis = {
+    null: "⬛",
+    investigate: "🔎",
+    election: "🗳️",
+    peek: "👀",
+    bullet: "🔫",
+  };
+  const lib_emoji_list = ["⬛", "⬛", "⬛", "⬛", "🕊️"];
+  let emoji_list = game.customGameSettings.powers.map((e) => emojis[e]);
+  emoji_list.push("💀");
 
   const embed = new Discord.MessageEmbed()
     .setTitle("Gamestate Update")
     .setDescription(
-      `${"🟦".repeat(game.gameState.lib)}${"⬛⬛⬛⬛🕊️".slice(
-        lib_cutoffs[game.gameState.lib]
-      )}\n${"⭕".repeat(game.gameState.failedGovs)}${"⚫".repeat(
+      `${"🟦".repeat(game.gameState.lib)}${lib_emoji_list
+        .slice(game.gameState.lib)
+        .join("")}\n${"⭕".repeat(game.gameState.failedGovs)}${"⚫".repeat(
         3 - game.gameState.failedGovs
-      )}\n${"🟥".repeat(game.gameState.fas)}${"⬛🔎🗳️🔫🔫💀".slice(
-        cutoffs[game.gameState.fas]
-      )}\n\n${game.players
+      )}\n${"🟥".repeat(game.gameState.fas)}${emoji_list
+        .slice(game.gameState.fas)
+        .join("")}\n\n${game.players
         .map(
           (player) =>
             `${deads[player.seat]}${votes[player.seat]} ${player.seat}\\. <@${
@@ -60,7 +69,7 @@ const gameStateMessage = (message, game) => {
     )
     .setFooter(`Waiting on: ${game.gameState.phase.slice(0, -4)}`);
   if (message.channel.type === "dm") {
-    const guild = client.guilds.cache.get(game.guild_id);
+    const guild = message.client.guilds.cache.get(game.guild_id);
     const channel = guild.channels.cache.get(game.channel_id);
     channel.send(embed);
   } else {
@@ -71,14 +80,14 @@ const gameStateMessage = (message, game) => {
 async function sendDM(message, game, dmText, id) {
   let player_disc;
   if (message.channel.type === "dm") {
-    const guild = await client.guilds.cache.get(game.guild_id);
+    const guild = await message.client.guilds.cache.get(game.guild_id).catch(() => null);
     player_disc = await guild.members.fetch(`${id}`).catch(() => null);
     if (!player_disc) return message.channel.send("User not found:(");
   } else {
     player_disc = await message.guild.members.fetch(`${id}`).catch(() => null);
     if (!player_disc) return message.channel.send("User not found:(");
   }
-  await player_disc.send(dmText).catch(() => {
+  return await player_disc.send(dmText).catch(() => {
     message.channel.send(
       "User has DMs closed or has no mutual servers with the bot:("
     );
@@ -112,7 +121,7 @@ async function checkGameEnd(message, game) {
   let guild;
   let channel;
   if (message.channel.type === "dm") {
-    guild = await client.guilds.cache.get(game.guild_id);
+    guild = await message.client.guilds.cache.get(game.guild_id);
     channel = await guild.channels.cache.get(game.channel_id);
   } else {
     guild = await message.guild;

@@ -2,7 +2,9 @@ const fs = require("fs");
 const Discord = require("discord.js");
 const Keyv = require("keyv");
 //const sheet = require("./sheet");
-global.client = new Discord.Client();
+const client = new Discord.Client();
+const process = require('process');
+require('events').EventEmitter.defaultMaxListeners = 10;
 const { format, utcToZonedTime } = require("date-fns-tz");
 const {
   PREFIX,
@@ -22,6 +24,12 @@ if (ENABLE_SENTRY) {
     tracesSampleRate: 1.0,
   });
 }
+
+process.on('warning', (warning) => {
+  console.warn(warning.name);    // Print the warning name
+  console.warn(warning.message); // Print the warning message
+  console.warn(warning.stack);   // Print the stack trace
+});
 
 global.authorized_data_setters;
 global.game_info;
@@ -56,7 +64,7 @@ client.once("ready", () => {
   console.log("Ready!");
 });
 
-client.on("message", async (message) => {
+async function message_func(message) {
   if (!message.content.startsWith(PREFIX) || message.author.bot) return;
   // initialize auth if not done already
   if (!(await authorized_data_setters.get("auth"))) {
@@ -102,7 +110,9 @@ client.on("message", async (message) => {
 
   if (command) {
     try {
+      //client.off("message",message_func);
       await command.execute(message, args, user);
+      //client.on("message",message_func);
     } catch (error) {
       console.error(error);
       message.channel.send(
@@ -116,6 +126,8 @@ client.on("message", async (message) => {
       )
     );
   }
-});
+}
+
+client.on("message", message_func);
 
 client.login(DISCORD_TOKEN);

@@ -23,43 +23,82 @@ async function execute(message, args, user) {
       } else {
         current_game.players.push({ id: message.author.id });
       }
-      
+
       const player_games = await game_info.get("player_games");
       player_games[message.author.id] = channels[message.channel.id];
       game_info.set("player_games", player_games);
-      
+
       if (current_game.players.length === current_game.playerCount) {
         current_game.gameState.phase = "nomWait";
         current_game.gameState.presidentId = 0;
         await game_info.set(current_game.game_id, current_game);
         current_game.players = shuffleArray(current_game.players);
-        
+
         const roleConfigs = {
           5: ["liberal", "liberal", "liberal", "fascist", "hitler"],
           6: ["liberal", "liberal", "liberal", "liberal", "fascist", "hitler"],
-          7: ["liberal", "liberal", "liberal", "liberal", "fascist", "fascist", "hitler"],
-          8: ["liberal", "liberal", "liberal", "liberal", "liberal", "fascist", "fascist", "hitler"],
-          9: ["liberal", "liberal", "liberal", "liberal", "liberal", "fascist", "fascist", "fascist", "hitler"],
-          10: ["liberal", "liberal", "liberal", "liberal", "liberal", "liberal", "fascist", "fascist", "fascist", "hitler"]
+          7: [
+            "liberal",
+            "liberal",
+            "liberal",
+            "liberal",
+            "fascist",
+            "fascist",
+            "hitler",
+          ],
+          8: [
+            "liberal",
+            "liberal",
+            "liberal",
+            "liberal",
+            "liberal",
+            "fascist",
+            "fascist",
+            "hitler",
+          ],
+          9: [
+            "liberal",
+            "liberal",
+            "liberal",
+            "liberal",
+            "liberal",
+            "fascist",
+            "fascist",
+            "fascist",
+            "hitler",
+          ],
+          10: [
+            "liberal",
+            "liberal",
+            "liberal",
+            "liberal",
+            "liberal",
+            "liberal",
+            "fascist",
+            "fascist",
+            "fascist",
+            "hitler",
+          ],
         };
-        
+
         const roles = shuffleArray(roleConfigs[current_game.playerCount]);
-        
+
         for (let i = 0; i < current_game.playerCount; i++) {
           current_game.players[i].role = roles[i];
           current_game.players[i].seat = i;
           current_game.player_ids[current_game.players[i].id] = i;
-          sendDM(
+          await sendDM(
             message,
             current_game,
             `Your seat is **${i}** and your role is **${roles[i]}**`,
             current_game.players[i].id
           );
-          
+        }
+        for (let i = 0; i < current_game.playerCount; i++) {
           if (roles[i] === "fascist") {
             for (let j = 0; j < current_game.playerCount; j++) {
               if (i !== j && roles[j] !== "liberal") {
-                sendDM(
+                await sendDM(
                   message,
                   current_game,
                   `The player <@${current_game.players[j].id}> in seat **${j}** is **${roles[j]}**`,

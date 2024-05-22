@@ -34,7 +34,7 @@ async function execute(message, args, user) {
         powers: powers,
         enabled: false,
         hitlerZone: 3,
-        vetoZone: 5,
+        vetoZone: 1,
         fascistCount: Math.floor((playerCount - 1) / 2),
         hitKnowsFas: playerCount < 7,
       },

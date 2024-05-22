@@ -25,7 +25,6 @@ async function execute(message, args, user) {
       if (current_game.players[parseInt(args[0])].role === "hitler") {
         current_game.gameState.hitlerDead = true;
       }
-      //GOTTA IMPLEMENT GAME ENDING STUFF HERE
       current_game.gameState.phase = "nomWait";
       current_game.gameState.lastPresidentId =
         current_game.gameState.presidentId;

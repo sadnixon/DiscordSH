@@ -51,7 +51,6 @@ async function execute(message, args, user) {
           vote_list.filter((e) => e).length >
           vote_list.filter((e) => e !== null).length / 2
         ) {
-          //current_game.gameState.failedGovs = 0;
           if (
             current_game.gameState.fas >=
               current_game.customGameSettings.hitlerZone &&
@@ -96,13 +95,10 @@ async function execute(message, args, user) {
               );
               current_game.gameState.discard = [];
             }
-            //GOTTA IMPLEMENT GAME ENDING STUFF HERE EVENTUALLY
           }
         }
         gameStateMessage(message, current_game);
-        for (let i = 0; i < current_game.players.length; i++) {
-          current_game.gameState.votes[i] = null;
-        }
+        current_game.gameState.votes = Array(current_game.playerCount).fill(null);
         checkGameEnd(message,current_game);
       }
       await game_info.set(current_game.game_id, current_game);

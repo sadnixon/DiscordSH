@@ -1,4 +1,3 @@
-//const sheet = require("../sheet");
 const { errorMessage, shuffleArray } = require("../message-helpers");
 
 async function execute(message, args, user) {

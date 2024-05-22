@@ -1,7 +1,6 @@
 const fs = require("fs");
 const Discord = require("discord.js");
 const Keyv = require("keyv");
-//const sheet = require("./sheet");
 const client = new Discord.Client();
 const process = require('process');
 require('events').EventEmitter.defaultMaxListeners = 10;

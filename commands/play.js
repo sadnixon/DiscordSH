@@ -38,7 +38,10 @@ async function execute(message, args, user) {
         //GOTTA IMPLEMENT GAME ENDING STUFF HERE EVENTUALLY
       } else {
         current_game.gameState.fas++;
-        const power_slot = current_game.customGameSettings.powers[current_game.gameState.fas - 1];
+        const power_slot =
+          current_game.customGameSettings.powers[
+            current_game.gameState.fas - 1
+          ];
 
         if (power_slot === null) {
           current_game.gameState.phase = "nomWait";
@@ -50,7 +53,24 @@ async function execute(message, args, user) {
         } else if (power_slot === "investigate") {
           current_game.gameState.phase = "investWait";
         } else if (power_slot === "peek") {
-          current_game.gameState.phase = "peekWait";
+          const peek_draw = current_game.gameState.deck.slice(
+            current_game.gameState.deck.length - 3
+          );
+          peek_draw.reverse();
+          sendDM(
+            message,
+            current_game,
+            `You have peeked at **${peek_draw.join(
+              ""
+            )}** in that order (top on the right).`,
+            current_game.players[current_game.gameState.presidentId].id
+          );
+          current_game.gameState.phase = "nomWait";
+          current_game.gameState.lastPresidentId =
+            current_game.gameState.presidentId;
+          current_game.gameState.lastChancellorId =
+            current_game.gameState.chancellorId;
+          advancePres(current_game);
         } else if (power_slot === "election") {
           current_game.gameState.phase = "seWait";
         } else if (power_slot === "bullet") {
@@ -66,7 +86,7 @@ async function execute(message, args, user) {
       }
       gameStateMessage(message, current_game);
       await game_info.set(current_game.game_id, current_game);
-      checkGameEnd(message,current_game);
+      checkGameEnd(message, current_game);
     } else {
       message.channel.send(errorMessage("Invalid play pick!"));
     }

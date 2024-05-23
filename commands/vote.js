@@ -20,20 +20,38 @@ async function execute(message, args, user) {
       current_game.gameState.phase === "voteWait"
     ) {
       let vote_index = current_game.player_ids[message.author.id];
+      let voting_all = false;
       if (
         args.length > 1 &&
-        _.range(0, current_game.players.length).includes(parseInt(args[1])) &&
-        !current_game.gameState.deadPlayers.includes(parseInt(args[1])) &&
-        current_game.players[parseInt(args[1])].id === message.author.id
+        _.range(0, current_game.players.length).includes(
+          parseInt(args[1]) - 1
+        ) &&
+        !current_game.gameState.deadPlayers.includes(parseInt(args[1]) - 1) &&
+        current_game.players[parseInt(args[1]) - 1].id === message.author.id
       ) {
-        vote_index = parseInt(args[1]);
+        vote_index = parseInt(args[1]) - 1;
+      } else if (
+        args.length > 1 &&
+        args[1].toLowerCase() === "all" &&
+        current_game.players
+          .map((e) => e.id)
+          .every((e) => e === message.author.id)
+      ) {
+        voting_all = true;
       }
       if (current_game.gameState.deadPlayers.includes(vote_index))
         return message.channel.send(errorMessage("You are dead!"));
-      if (args[0].toLowerCase() === "ja") {
-        current_game.gameState.votes[vote_index] = true;
+
+      if (voting_all) {
+        for (i = 0; i < current_game.players.length; i++) {
+          if (!current_game.gameState.deadPlayers.includes(i)) {
+            current_game.gameState.votes[i] =
+              args[0].toLowerCase() === "ja" ? true : false;
+          }
+        }
       } else {
-        current_game.gameState.votes[vote_index] = false;
+        current_game.gameState.votes[vote_index] =
+          args[0].toLowerCase() === "ja" ? true : false;
       }
 
       const vote_list = _.range(0, current_game.players.length).map(

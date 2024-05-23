@@ -66,6 +66,9 @@ client.on("message", async (message) => {
   if (!(await game_info.get("player_games"))) {
     await game_info.set("player_games", {});
   }
+  if (!(await game_info.get("games"))) {
+    await game_info.set("games", {});
+  }
 
   const isAuthorized =
     (await authorized_data_setters.get("auth")).indexOf(message.author.id) >=

@@ -2,6 +2,7 @@ const {
   errorMessage,
   gameStateMessage,
   sendDM,
+  policyMap,
 } = require("../message-helpers");
 const _ = require("lodash");
 
@@ -27,6 +28,13 @@ async function execute(message, args, user) {
         current_game.gameState.chancellorId;
       current_game.gameState.presidentId = parseInt(args[0]);
       current_game.gameState.chancellorId = -1;
+
+      current_game.gameState.log.specialElection = parseInt(args[0]);
+      const deckState = current_game.gameState.deck.map((e) => policyMap[e]);
+      deckState.reverse();
+      current_game.gameState.log.deckState = deckState;
+      current_game.logs.push(current_game.gameState.log);
+      current_game.gameState.log = {};
       await game_info.set(current_game.game_id, current_game);
       gameStateMessage(message, current_game);
     } else {

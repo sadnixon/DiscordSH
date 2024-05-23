@@ -5,6 +5,11 @@ const errorMessage = (message) => {
   return new Discord.MessageEmbed().setDescription(message).setColor("#ff0000");
 };
 
+const policyMap = {
+  B: "liberal",
+  R: "fascist",
+};
+
 const gameStateMessage = (message, game) => {
   const deads = _.range(0, game.players.length).map((i) =>
     game.gameState.deadPlayers.includes(i) ? "~~" : ""
@@ -80,7 +85,9 @@ const gameStateMessage = (message, game) => {
 async function sendDM(message, game, dmText, id) {
   let player_disc;
   if (message.channel.type === "dm") {
-    const guild = await message.client.guilds.cache.get(game.guild_id).catch(() => null);
+    const guild = await message.client.guilds.cache
+      .get(game.guild_id)
+      .catch(() => null);
     player_disc = await guild.members.fetch(`${id}`).catch(() => null);
     if (!player_disc) return message.channel.send("User not found:(");
   } else {
@@ -158,14 +165,16 @@ async function checkGameEnd(message, game) {
     delete player_games[game.players[i].id];
   }
   game.gameState.phase = "done";
+  console.log(game.logs);
   const channels = await game_info.get("game_channels");
   delete channels[game.channel_id];
   await game_info.set("game_channels", channels);
   await game_info.set("player_games", player_games);
+  delete game.gameState;
   const games = await game_info.get("games");
-  games[current_game.game_id] = current_game;
+  games[game.game_id] = game;
   await game_info.set("games", games);
-  await game_info.delete(current_game.game_id);
+  await game_info.delete(game.game_id);
 }
 
 const advancePres = (game) => {
@@ -194,6 +203,17 @@ const shuffleArray = (array) => {
   return array;
 };
 
+const topDeckCheck = (game) => {
+  if (game.gameState.deck.length < 3) {
+    game.gameState.deck = shuffleArray(
+      game.gameState.deck.concat(
+        game.gameState.discard
+      )
+    );
+    game.gameState.discard = [];
+  }
+}
+
 module.exports = {
   errorMessage,
   shuffleArray,
@@ -201,4 +221,6 @@ module.exports = {
   gameStateMessage,
   advancePres,
   checkGameEnd,
+  topDeckCheck,
+  policyMap,
 };

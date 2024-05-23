@@ -5,6 +5,8 @@ const {
   gameStateMessage,
   advancePres,
   checkGameEnd,
+  policyMap,
+  topDeckCheck,
 } = require("../message-helpers");
 const _ = require("lodash");
 
@@ -67,8 +69,12 @@ async function execute(message, args, user) {
         current_game.gameState.presidentVeto !== null &&
         current_game.gameState.chancellorVeto !== null
       ) {
-        current_game.gameState.votes[current_game.gameState.presidentId] = current_game.gameState.presidentVeto;
-        current_game.gameState.votes[current_game.gameState.chancellorId] = current_game.gameState.chancellorVeto;
+        current_game.gameState.votes[current_game.gameState.presidentId] =
+          current_game.gameState.presidentVeto;
+        current_game.gameState.votes[current_game.gameState.chancellorId] =
+          current_game.gameState.chancellorVeto;
+        current_game.gameState.log.presidentVeto = current_game.gameState.presidentVeto;
+        current_game.gameState.log.chancellorVeto = current_game.gameState.chancellorVeto;
         if (
           current_game.gameState.presidentVeto &&
           current_game.gameState.chancellorVeto
@@ -90,6 +96,7 @@ async function execute(message, args, user) {
               current_game.gameState.discard = [];
             }
             const top_deck = current_game.gameState.deck.pop();
+            current_game.gameState.log.enactedPolicy = policyMap[top_deck];
             if (top_deck === "B") {
               current_game.gameState.lib++;
             } else {
@@ -97,15 +104,16 @@ async function execute(message, args, user) {
             }
             current_game.gameState.lastPresidentId = -1;
             current_game.gameState.lastChancellorId = -1;
-            if (current_game.gameState.deck.length < 3) {
-              current_game.gameState.deck = shuffleArray(
-                current_game.gameState.deck.concat(
-                  current_game.gameState.discard
-                )
-              );
-              current_game.gameState.discard = [];
-            }
+            topDeckCheck(current_game);
           }
+          topDeckCheck(current_game);
+          const deckState = current_game.gameState.deck.map(
+            (e) => policyMap[e]
+          );
+          deckState.reverse();
+          current_game.gameState.log.deckState = deckState;
+          current_game.logs.push(current_game.gameState.log);
+          current_game.gameState.log = {};
         } else {
           current_game.gameState.phase = "chancWait";
           sendDM(
@@ -118,10 +126,12 @@ async function execute(message, args, user) {
           );
         }
         gameStateMessage(message, current_game);
-        current_game.gameState.votes = Array(current_game.playerCount).fill(null);
+        current_game.gameState.votes = Array(current_game.playerCount).fill(
+          null
+        );
         current_game.gameState.presidentVeto = null;
         current_game.gameState.chancellorVeto = null;
-        checkGameEnd(message,current_game);
+        checkGameEnd(message, current_game);
       }
       await game_info.set(current_game.game_id, current_game);
     } else {

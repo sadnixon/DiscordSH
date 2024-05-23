@@ -5,6 +5,8 @@ const {
   gameStateMessage,
   advancePres,
   checkGameEnd,
+  policyMap,
+  topDeckCheck,
 } = require("../message-helpers");
 const _ = require("lodash");
 
@@ -27,6 +29,7 @@ async function execute(message, args, user) {
       current_game.gameState.discard.push(
         current_game.gameState.chancellorHand.pop()
       );
+      current_game.gameState.log.enactedPolicy = policyMap[args[0]];
       if (args[0] === "B") {
         current_game.gameState.phase = "nomWait";
         current_game.gameState.lastPresidentId =
@@ -34,8 +37,12 @@ async function execute(message, args, user) {
         current_game.gameState.lastChancellorId =
           current_game.gameState.chancellorId;
         advancePres(current_game);
+        const deckState = current_game.gameState.deck.map((e) => policyMap[e]);
+        deckState.reverse();
+        current_game.gameState.log.deckState = deckState;
+        current_game.logs.push(current_game.gameState.log);
+        current_game.gameState.log = {};
         current_game.gameState.lib++;
-        //GOTTA IMPLEMENT GAME ENDING STUFF HERE EVENTUALLY
       } else {
         current_game.gameState.fas++;
         const power_slot =
@@ -50,13 +57,26 @@ async function execute(message, args, user) {
           current_game.gameState.lastChancellorId =
             current_game.gameState.chancellorId;
           advancePres(current_game);
+          const deckState = current_game.gameState.deck.map(
+            (e) => policyMap[e]
+          );
+          deckState.reverse();
+          current_game.gameState.log.deckState = deckState;
+          current_game.logs.push(current_game.gameState.log);
+          current_game.gameState.log = {};
         } else if (power_slot === "investigate") {
           current_game.gameState.phase = "investWait";
+          current_game.gameState.log.investigatorId =
+            current_game.gameState.presidentId;
         } else if (power_slot === "peek") {
+          topDeckCheck(current_game);
           const peek_draw = current_game.gameState.deck.slice(
             current_game.gameState.deck.length - 3
           );
           peek_draw.reverse();
+          current_game.gameState.log.policyPeek = peek_draw.map(
+            (e) => policyMap[e]
+          );
           sendDM(
             message,
             current_game,
@@ -71,19 +91,20 @@ async function execute(message, args, user) {
           current_game.gameState.lastChancellorId =
             current_game.gameState.chancellorId;
           advancePres(current_game);
+          const deckState = current_game.gameState.deck.map(
+            (e) => policyMap[e]
+          );
+          deckState.reverse();
+          current_game.gameState.log.deckState = deckState;
+          current_game.logs.push(current_game.gameState.log);
+          current_game.gameState.log = {};
         } else if (power_slot === "election") {
           current_game.gameState.phase = "seWait";
         } else if (power_slot === "bullet") {
           current_game.gameState.phase = "gunWait";
         }
-        //GOTTA IMPLEMENT GAME ENDING STUFF HERE EVENTUALLY
       }
-      if (current_game.gameState.deck.length < 3) {
-        current_game.gameState.deck = shuffleArray(
-          current_game.gameState.deck.concat(current_game.gameState.discard)
-        );
-        current_game.gameState.discard = [];
-      }
+      topDeckCheck(current_game);
       gameStateMessage(message, current_game);
       await game_info.set(current_game.game_id, current_game);
       checkGameEnd(message, current_game);

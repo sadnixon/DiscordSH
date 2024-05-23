@@ -3,6 +3,7 @@ const {
   shuffleArray,
   sendDM,
   gameStateMessage,
+  policyMap
 } = require("../message-helpers");
 const _ = require("lodash");
 
@@ -26,6 +27,8 @@ async function execute(message, args, user) {
       );
       current_game.gameState.chancellorHand =
         current_game.gameState.presidentHand.splice(0, 2);
+      current_game.gameState.log.chancellorHand =
+        current_game.gameState.chancellorHand.map((e) => policyMap[e]);
       let dmText;
       if (
         current_game.gameState.fas >= current_game.customGameSettings.vetoZone

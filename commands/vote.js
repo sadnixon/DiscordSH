@@ -5,6 +5,8 @@ const {
   gameStateMessage,
   advancePres,
   checkGameEnd,
+  policyMap,
+  topDeckCheck,
 } = require("../message-helpers");
 const _ = require("lodash");
 
@@ -54,10 +56,17 @@ async function execute(message, args, user) {
           if (
             current_game.gameState.fas >=
               current_game.customGameSettings.hitlerZone &&
-            current_game.players[current_game.gameState.chancellorId]
-              .role === "hitler"
+            current_game.players[current_game.gameState.chancellorId].role ===
+              "hitler"
           ) {
             current_game.gameState.hitlerElected = true;
+            const deckState = current_game.gameState.deck.map(
+              (e) => policyMap[e]
+            );
+            deckState.reverse();
+            current_game.gameState.log.deckState = deckState;
+            current_game.logs.push(current_game.gameState.log);
+            current_game.gameState.log = {};
           }
           current_game.gameState.phase = "presWait";
           for (let i = 0; i < 3; i++) {
@@ -65,6 +74,8 @@ async function execute(message, args, user) {
               current_game.gameState.deck.pop()
             );
           }
+          current_game.gameState.log.presidentHand =
+            current_game.gameState.presidentHand.map((e) => policyMap[e]);
           sendDM(
             message,
             current_game,
@@ -80,6 +91,7 @@ async function execute(message, args, user) {
           if (current_game.gameState.failedGovs > 2) {
             current_game.gameState.failedGovs = 0;
             const top_deck = current_game.gameState.deck.pop();
+            current_game.gameState.log.enactedPolicy = policyMap[top_deck];
             if (top_deck === "B") {
               current_game.gameState.lib++;
             } else {
@@ -87,19 +99,21 @@ async function execute(message, args, user) {
             }
             current_game.gameState.lastPresidentId = -1;
             current_game.gameState.lastChancellorId = -1;
-            if (current_game.gameState.deck.length < 3) {
-              current_game.gameState.deck = shuffleArray(
-                current_game.gameState.deck.concat(
-                  current_game.gameState.discard
-                )
-              );
-              current_game.gameState.discard = [];
-            }
+            topDeckCheck(current_game);
           }
+          const deckState = current_game.gameState.deck.map(
+            (e) => policyMap[e]
+          );
+          deckState.reverse();
+          current_game.gameState.log.deckState = deckState;
+          current_game.logs.push(current_game.gameState.log);
+          current_game.gameState.log = {};
         }
         gameStateMessage(message, current_game);
-        current_game.gameState.votes = Array(current_game.playerCount).fill(null);
-        checkGameEnd(message,current_game);
+        current_game.gameState.votes = Array(current_game.playerCount).fill(
+          null
+        );
+        checkGameEnd(message, current_game);
       }
       await game_info.set(current_game.game_id, current_game);
     } else {

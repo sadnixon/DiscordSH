@@ -17,14 +17,14 @@ async function execute(message, args, user) {
     }
     if (
       args &&
-      _.range(0, current_game.players.length).includes(parseInt(args[0])) &&
-      !termlocked.includes(parseInt(args[0])) &&
-      !current_game.gameState.deadPlayers.includes(parseInt(args[0])) &&
+      _.range(0, current_game.players.length).includes(parseInt(args[0])-1) &&
+      !termlocked.includes(parseInt(args[0])-1) &&
+      !current_game.gameState.deadPlayers.includes(parseInt(args[0])-1) &&
       current_game.gameState.phase === "nomWait" &&
       current_game.players[current_game.gameState.presidentId].id ===
         message.author.id
     ) {
-      current_game.gameState.chancellorId = parseInt(args[0]);
+      current_game.gameState.chancellorId = parseInt(args[0])-1;
       current_game.gameState.phase = "voteWait";
       await game_info.set(current_game.game_id, current_game);
       gameStateMessage(message, current_game);

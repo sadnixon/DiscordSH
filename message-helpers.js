@@ -1,8 +1,8 @@
-const Discord = require("discord.js");
+const {EmbedBuilder, ChannelType} = require("discord.js");
 const _ = require("lodash");
 
 const errorMessage = (message) => {
-  return new Discord.MessageEmbed().setDescription(message).setColor("#ff0000");
+  return {embeds: [new EmbedBuilder().setDescription(message).setColor("#ff0000")]};
 };
 
 const policyMap = {
@@ -52,7 +52,7 @@ const gameStateMessage = (message, game) => {
   let emoji_list = game.customGameSettings.powers.map((e) => emojis[e]);
   emoji_list.push("💀");
 
-  const embed = new Discord.MessageEmbed()
+  const embed = new EmbedBuilder()
     .setTitle("Gamestate Update")
     .setDescription(
       `${"🟦".repeat(game.gameState.lib)}${lib_emoji_list
@@ -64,7 +64,7 @@ const gameStateMessage = (message, game) => {
         .join("")}\n\n${game.players
         .map(
           (player) =>
-            `${deads[player.seat]}${votes[player.seat]} ${player.seat}\\. <@${
+            `${deads[player.seat]}${votes[player.seat]} ${player.seat+1}\\. <@${
               player.id
             }> ${pres[player.seat]}${chanc[player.seat]}${TL[player.seat]}${
               deads[player.seat]
@@ -72,19 +72,19 @@ const gameStateMessage = (message, game) => {
         )
         .join("\n")}`
     )
-    .setFooter(`Waiting on: ${game.gameState.phase.slice(0, -4)}`);
-  if (message.channel.type === "dm") {
+    .setFooter({ text: `Waiting on: ${game.gameState.phase.slice(0, -4)}`});
+  if (message.channel.type === ChannelType.DM) {
     const guild = message.client.guilds.cache.get(game.guild_id);
     const channel = guild.channels.cache.get(game.channel_id);
-    channel.send(embed);
+    channel.send({ embeds: [embed] });
   } else {
-    message.channel.send(embed);
+    message.channel.send({ embeds: [embed] });
   }
 };
 
 async function sendDM(message, game, dmText, id) {
   let player_disc;
-  if (message.channel.type === "dm") {
+  if (message.channel.type === ChannelType.DM) {
     const guild = await message.client.guilds.cache
       .get(game.guild_id)
       .catch(() => null);
@@ -127,14 +127,14 @@ async function checkGameEnd(message, game) {
   );
   let guild;
   let channel;
-  if (message.channel.type === "dm") {
+  if (message.channel.type === ChannelType.DM) {
     guild = await message.client.guilds.cache.get(game.guild_id);
     channel = await guild.channels.cache.get(game.channel_id);
   } else {
     guild = await message.guild;
     channel = await message.channel;
   }
-  const embed = new Discord.MessageEmbed()
+  const embed = new EmbedBuilder()
     .setTitle(end_method)
     .setDescription(
       `${game.players
@@ -146,8 +146,8 @@ async function checkGameEnd(message, game) {
         )
         .join("\n")}`
     )
-    .setFooter("GG everybody!");
-  channel.send(embed);
+    .setFooter({ text: "GG everybody!"});
+  channel.send({ embeds: [embed] });
   const player_games = await game_info.get("player_games");
   for (let i = 0; i < game.players.length; i++) {
     let result;

@@ -12,9 +12,9 @@ async function execute(message, args, user) {
     const current_game = await game_info.get(channels[message.channel.id]);
     if (
       args &&
-      _.range(0, current_game.players.length).includes(parseInt(args[0])) &&
-      current_game.gameState.presidentId !== parseInt(args[0]) &&
-      !current_game.gameState.deadPlayers.includes(parseInt(args[0])) &&
+      _.range(0, current_game.players.length).includes(parseInt(args[0])-1) &&
+      current_game.gameState.presidentId !== parseInt(args[0])-1 &&
+      !current_game.gameState.deadPlayers.includes(parseInt(args[0])-1) &&
       current_game.gameState.phase === "seWait" &&
       current_game.players[current_game.gameState.presidentId].id ===
         message.author.id
@@ -26,10 +26,10 @@ async function execute(message, args, user) {
         current_game.gameState.presidentId;
       current_game.gameState.lastChancellorId =
         current_game.gameState.chancellorId;
-      current_game.gameState.presidentId = parseInt(args[0]);
+      current_game.gameState.presidentId = parseInt(args[0])-1;
       current_game.gameState.chancellorId = -1;
 
-      current_game.gameState.log.specialElection = parseInt(args[0]);
+      current_game.gameState.log.specialElection = parseInt(args[0])-1;
       const deckState = current_game.gameState.deck.map((e) => policyMap[e]);
       deckState.reverse();
       current_game.gameState.log.deckState = deckState;

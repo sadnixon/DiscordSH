@@ -15,15 +15,15 @@ async function execute(message, args, user) {
 
     if (
       args &&
-      _.range(0, current_game.players.length).includes(parseInt(args[0])) &&
-      current_game.gameState.presidentId !== parseInt(args[0]) &&
-      !current_game.gameState.deadPlayers.includes(parseInt(args[0])) &&
+      _.range(0, current_game.players.length).includes(parseInt(args[0])-1) &&
+      current_game.gameState.presidentId !== parseInt(args[0])-1 &&
+      !current_game.gameState.deadPlayers.includes(parseInt(args[0])-1) &&
       current_game.gameState.phase === "gunWait" &&
       current_game.players[current_game.gameState.presidentId].id ===
         message.author.id
     ) {
-      current_game.gameState.deadPlayers.push(parseInt(args[0]));
-      if (current_game.players[parseInt(args[0])].role === "hitler") {
+      current_game.gameState.deadPlayers.push(parseInt(args[0])-1);
+      if (current_game.players[parseInt(args[0])-1].role === "hitler") {
         current_game.gameState.hitlerDead = true;
       }
       current_game.gameState.phase = "nomWait";
@@ -31,7 +31,7 @@ async function execute(message, args, user) {
         current_game.gameState.presidentId;
       current_game.gameState.lastChancellorId =
         current_game.gameState.chancellorId;
-      current_game.gameState.log.execution = parseInt(args[0]);
+      current_game.gameState.log.execution = parseInt(args[0])-1;
       advancePres(current_game);
       const deckState = current_game.gameState.deck.map((e) => policyMap[e]);
       deckState.reverse();

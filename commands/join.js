@@ -90,7 +90,7 @@ async function execute(message, args, user) {
           await sendDM(
             message,
             current_game,
-            `Your seat is **${i}** and your role is **${roles[i]}**`,
+            `Your seat is **${i+1}** and your role is **${roles[i]}**`,
             current_game.players[i].id
           );
         }
@@ -101,7 +101,7 @@ async function execute(message, args, user) {
                 await sendDM(
                   message,
                   current_game,
-                  `The player <@${current_game.players[j].id}> in seat **${j}** is **${roles[j]}**`,
+                  `The player <@${current_game.players[j].id}> in seat **${j+1}** is **${roles[j]}**`,
                   current_game.players[i].id
                 );
               }

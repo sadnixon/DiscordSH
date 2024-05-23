@@ -1,7 +1,14 @@
 const fs = require("fs");
-const Discord = require("discord.js");
+const { Collection, Client, GatewayIntentBits } = require('discord.js');
 const Keyv = require("keyv");
-const client = new Discord.Client();
+const client = new Client({
+	intents: [
+		GatewayIntentBits.Guilds,
+		GatewayIntentBits.GuildMessages,
+		GatewayIntentBits.MessageContent,
+		GatewayIntentBits.GuildMembers,
+	],
+});
 const { format, utcToZonedTime } = require("date-fns-tz");
 const {
   PREFIX,
@@ -37,7 +44,7 @@ if (ENABLE_DB) {
   game_info = new Keyv();
 }
 
-client.commands = new Discord.Collection();
+client.commands = new Collection();
 const commandFiles = fs
   .readdirSync("./commands")
   .filter((file) => file.endsWith(".js"));
@@ -54,7 +61,7 @@ client.once("ready", () => {
   console.log("Ready!");
 });
 
-client.on("message", async (message) => {
+client.on("messageCreate", async (message) => {
   if (!message.content.startsWith(PREFIX) || message.author.bot) return;
   // initialize auth if not done already
   if (!(await authorized_data_setters.get("auth"))) {

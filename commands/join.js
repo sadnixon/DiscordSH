@@ -37,49 +37,25 @@ async function execute(message, args, user) {
         const roleConfigs = {
           5: ["liberal", "liberal", "liberal", "fascist", "hitler"],
           6: ["liberal", "liberal", "liberal", "liberal", "fascist", "hitler"],
-          7: [
-            "liberal",
-            "liberal",
-            "liberal",
-            "liberal",
-            "fascist",
-            "fascist",
-            "hitler",
-          ],
-          8: [
-            "liberal",
-            "liberal",
-            "liberal",
-            "liberal",
-            "liberal",
-            "fascist",
-            "fascist",
-            "hitler",
-          ],
-          9: [
-            "liberal",
-            "liberal",
-            "liberal",
-            "liberal",
-            "liberal",
-            "fascist",
-            "fascist",
-            "fascist",
-            "hitler",
-          ],
-          10: [
-            "liberal",
-            "liberal",
-            "liberal",
-            "liberal",
-            "liberal",
-            "liberal",
-            "fascist",
-            "fascist",
-            "fascist",
-            "hitler",
-          ],
+          7: ["liberal", "liberal", "liberal", "liberal", "fascist", "fascist", "hitler"],
+          8: ["liberal", "liberal", "liberal", "liberal", "liberal", "fascist", "fascist", "hitler"],
+          9: ["liberal", "liberal", "liberal", "liberal", "liberal", "fascist", "fascist", "fascist", "hitler"],
+          10: ["liberal", "liberal", "liberal", "liberal", "liberal", "liberal", "fascist", "fascist", "fascist", "hitler"],
         };
+
+        if (current_game.customGameSettings.monarchist) {
+          for (let roles of Object.values(roleConfigs)) {
+            const index = roles.indexOf("fascist");
+            if (index !== -1) roles[index] = "monarchist";
+          }
+        }
+
+        if (current_game.customGameSettings.avalon) {
+          for (let roles of Object.values(roleConfigs)) {
+            const index = roles.indexOf("liberal");
+            if (index !== -1) roles[index] = "merlin";
+          }
+        }
 
         const roles = shuffleArray(roleConfigs[current_game.playerCount]);
 
@@ -90,24 +66,13 @@ async function execute(message, args, user) {
           await sendDM(
             message,
             current_game,
-            `Your seat is **${i+1}** and your role is **${roles[i]}**`,
+            `Your seat is **${i + 1}** and your role is **${roles[i]}**`,
             current_game.players[i].id
           );
         }
-        for (let i = 0; i < current_game.playerCount; i++) {
-          if (roles[i] === "fascist") {
-            for (let j = 0; j < current_game.playerCount; j++) {
-              if (i !== j && roles[j] !== "liberal") {
-                await sendDM(
-                  message,
-                  current_game,
-                  `The player <@${current_game.players[j].id}> in seat **${j+1}** is **${roles[j]}**`,
-                  current_game.players[i].id
-                );
-              }
-            }
-          }
-        }
+
+        await notifyRoles(message, current_game, roles);
+
         gameStateMessage(message, current_game);
       }
       await game_info.set(current_game.game_id, current_game);
@@ -120,6 +85,53 @@ async function execute(message, args, user) {
     }
   } else {
     message.channel.send(errorMessage("No game in this channel!"));
+  }
+}
+
+async function notifyRoles(message, current_game, roles) {
+  for (let i = 0; i < current_game.playerCount; i++) {
+    const player = current_game.players[i];
+    if (roles[i] === "fascist" || (roles[i] === "hitler" && current_game.customGameSettings.hitKnowsFas)) {
+      for (let j = 0; j < current_game.playerCount; j++) {
+        if (i !== j && (roles[j] === "fascist" || roles[j] === "hitler")) {
+          await sendDM(
+            message,
+            current_game,
+            `The player <@${current_game.players[j].id}> in seat **${current_game.players[j].seat + 1}** is **${roles[j]}**`,
+            current_game.players[i].id
+          );
+        } else if (i !== j && roles[j] === "monarchist") {
+          await sendDM(
+            message,
+            current_game,
+            `The player <@${current_game.players[j].id}> in seat **${current_game.players[j].seat + 1}** is a **fascist**`,
+            current_game.players[i].id
+          );
+        }
+      }
+    } else if (roles[i] === "merlin") {
+      for (let j = 0; j < current_game.playerCount; j++) {
+        if (roles[j] === "fascist" || roles[j] === "monarchist" || roles[j] === "hitler") {
+          await sendDM(
+            message,
+            current_game,
+            `The player <@${current_game.players[j].id}> in seat **${current_game.players[j].seat + 1}** is a fascist-aligned role`,
+            current_game.players[i].id
+          );
+        }
+      }
+    } else if (roles[i] === "monarchist") {
+      for (let j = 0; j < current_game.playerCount; j++) {
+        if (i !== j && roles[j] === "fascist") {
+          await sendDM(
+            message,
+            current_game,
+            `The player <@${current_game.players[j].id}> in seat **${current_game.players[j].seat + 1}** is a **fascist**`,
+            current_game.players[i].id
+          );
+        }
+      }
+    }
   }
 }
 

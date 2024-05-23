@@ -4,14 +4,23 @@ async function execute(message, args, user) {
   const channels = await game_info.get("game_channels");
   if (!(message.channel.id in channels)) {
     let playerCount;
-    if (args && args[0]) {
+    let monarchist = false;
+    let avalon = false;
+
+    // Check for arguments and gamemodes (case-insensitive)
+    if (args && args.length > 0) {
       playerCount = parseInt(args[0], 10); // Get player count from command arguments
+      args.slice(1).forEach((arg) => {
+        const lowerArg = arg.toLowerCase();
+        if (lowerArg === "monarchist") monarchist = true;
+        if (lowerArg === "avalon") avalon = true;
+      });
     } else {
       // If no player count is specified, prompt the user to provide it
       message.channel.send("Please specify the number of players (between 5 and 10).");
       return;
     }
-    
+
     if (isNaN(playerCount) || playerCount < 5 || playerCount > 10) {
       message.channel.send(errorMessage("Invalid player count. Please specify a number between 5 and 10."));
       return;
@@ -37,6 +46,8 @@ async function execute(message, args, user) {
         vetoZone: 5,
         fascistCount: Math.floor((playerCount - 1) / 2),
         hitKnowsFas: playerCount < 7,
+        monarchist: monarchist,
+        avalon: avalon,
       },
       date: new Date(),
       gameSetting: {
@@ -90,7 +101,18 @@ async function execute(message, args, user) {
     await game_info.set("game_channels", channels);
     await game_info.set(game_id, game_data);
 
-    message.channel.send(`Game created for ${playerCount} players!`);
+    let gameModeMessage;
+    if (monarchist && avalon) {
+      gameModeMessage = " Monarchist and Avalon modes enabled.";
+    } else if (monarchist) {
+      gameModeMessage = " Monarchist mode enabled.";
+    } else if (avalon) {
+      gameModeMessage = " Avalon mode enabled.";
+    } else {
+      gameModeMessage = " Vanilla Secret Hitler mode enabled.";
+    }
+
+    message.channel.send(`Game created for ${playerCount} players!${gameModeMessage}`);
   } else {
     message.channel.send(errorMessage("A game already exists in this channel!"));
   }

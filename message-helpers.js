@@ -44,7 +44,7 @@ const gameStateMessage = (message, game) => {
   );
   const roles = _.range(0, game.players.length).map((i) =>
     !["liberal", "merlin", "percival"].includes(game.players[i].role) &&
-    game.gameState.phase === "assassinationWait"
+    game.gameState.phase === "assassinWait"
       ? `: ${game.players[i].role}`
       : ""
   );

@@ -183,7 +183,7 @@ async function checkGameEnd(message, game) {
       `${game.players
         .map(
           (player) =>
-            `${deads[player.seat]}${player.seat}\\. <@${player.id}>:${
+            `${deads[player.seat]}${player.seat + 1}\\. <@${player.id}>:${
               deads[player.seat]
             } ${player.role}`
         )

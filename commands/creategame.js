@@ -15,7 +15,7 @@ async function execute(message, args, user) {
         avalon = true;
         if (args.map((e) => e.toLowerCase()).includes("percival")) percy = true;
       }
-      playerCount = args.find(num => parseInt(num) >= 5 && parseInt(num) <= 10);
+      playerCount = parseInt(args.find(num => parseInt(num) >= 5 && parseInt(num) <= 10));
     } else {
       // If no player count is specified, prompt the user to provide it
       message.channel.send(errorMessage("Please specify the number of players (between 5 and 10)."));
@@ -27,6 +27,7 @@ async function execute(message, args, user) {
       return;
     }
 
+    let powers;
     if (playerCount === 5 || playerCount === 6) {
       powers = [null, null, "peek", "bullet", "bullet"];
     } else if (playerCount === 9 || playerCount === 10) {

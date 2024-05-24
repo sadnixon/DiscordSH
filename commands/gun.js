@@ -28,7 +28,7 @@ async function execute(message, args, user) {
       current_game.gameState.phase = "nomWait";
       if (parseInt(args[0]) - 1 === hitler_index) {
         current_game.gameState.hitlerDead = true;
-        if (current_game.gameSetting.avalon)
+        if (current_game.customGameSettings.avalon)
           current_game.gameState.phase = "assassinWait";
       }
       current_game.gameState.lastPresidentId =

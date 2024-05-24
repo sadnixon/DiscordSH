@@ -121,7 +121,7 @@ async function execute(message, args, user) {
               if (top_deck === "B") {
                 current_game.gameState.lib++;
                 if (
-                  current_game.gameSetting.avalon &&
+                  current_game.customGameSettings.avalon &&
                   current_game.gameState.lib === 5
                 )
                   current_game.gameState.phase = "assassinWait";

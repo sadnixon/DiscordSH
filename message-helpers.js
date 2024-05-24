@@ -112,10 +112,10 @@ async function sendDM(message, game, dmText, id) {
 async function checkGameEnd(message, game) {
   if (
     !(
-      (game.gameState.lib === 5 && !game.gameSetting.avalon) ||
+      (game.gameState.lib === 5 && !game.customGameSettings.avalon) ||
       game.gameState.fas === 6 ||
       game.gameState.hitlerElected ||
-      (game.gameState.hitlerDead && !game.gameSetting.avalon) ||
+      (game.gameState.hitlerDead && !game.customGameSettings.avalon) ||
       game.gameState.assassinatedPlayer > -1 ||
       (game.gameSetting.noTopdecking &&
         game.gameState.topDecks === game.gameSetting.noTopdecking)
@@ -126,7 +126,7 @@ async function checkGameEnd(message, game) {
   let end_method;
   let winning_players;
   if (game.gameState.lib === 5) {
-    if (game.gameSetting.avalon) {
+    if (game.customGameSettings.avalon) {
       if (game.players[game.gameState.assassinatedPlayer].role === "merlin") {
         end_method =
           "Five liberal policies were enacted, but Merlin was assassinated! Fascists win!";
@@ -147,7 +147,7 @@ async function checkGameEnd(message, game) {
     end_method = "Hitler was elected Chancellor! Fascists win!";
     winning_players = ["fascist", "morgana", "hitler"];
   } else if (game.gameState.hitlerDead) {
-    if (game.gameSetting.avalon) {
+    if (game.customGameSettings.avalon) {
       if (game.players[game.gameState.assassinatedPlayer].role === "merlin") {
         end_method =
           "Hitler was executed, but Merlin was assassinated! Fascists win!";
@@ -254,11 +254,11 @@ const roleListConstructor = (game) => {
   };
 
   const secondLiberal =
-    game.gameSetting.avalon && game.gameSetting.avalonSH.withPercival
+    game.customGameSettings.avalon && game.gameSetting.avalonSH.withPercival
       ? "percival"
       : "liberal";
   const secondFascist =
-    game.gameSetting.avalon && game.gameSetting.avalonSH.withPercival
+    game.customGameSettings.avalon && game.gameSetting.avalonSH.withPercival
       ? "morgana"
       : "fascist";
   if (game.customGameSettings.monarchist && game.customGameSettings.avalon) {

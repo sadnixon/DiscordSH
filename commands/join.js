@@ -3,6 +3,7 @@ const {
   shuffleArray,
   sendDM,
   gameStateMessage,
+  roleListConstructor,
 } = require("../message-helpers");
 
 async function execute(message, args, user) {
@@ -34,30 +35,7 @@ async function execute(message, args, user) {
         await game_info.set(current_game.game_id, current_game);
         current_game.players = shuffleArray(current_game.players);
 
-        const roleConfigs = {
-          5: ["liberal", "liberal", "liberal", "fascist", "hitler"],
-          6: ["liberal", "liberal", "liberal", "liberal", "fascist", "hitler"],
-          7: ["liberal", "liberal", "liberal", "liberal", "fascist", "fascist", "hitler"],
-          8: ["liberal", "liberal", "liberal", "liberal", "liberal", "fascist", "fascist", "hitler"],
-          9: ["liberal", "liberal", "liberal", "liberal", "liberal", "fascist", "fascist", "fascist", "hitler"],
-          10: ["liberal", "liberal", "liberal", "liberal", "liberal", "liberal", "fascist", "fascist", "fascist", "hitler"],
-        };
-
-        if (current_game.customGameSettings.monarchist) {
-          for (let roles of Object.values(roleConfigs)) {
-            const index = roles.indexOf("fascist");
-            if (index !== -1) roles[index] = "monarchist";
-          }
-        }
-
-        if (current_game.customGameSettings.avalon) {
-          for (let roles of Object.values(roleConfigs)) {
-            const index = roles.indexOf("liberal");
-            if (index !== -1) roles[index] = "merlin";
-          }
-        }
-
-        const roles = shuffleArray(roleConfigs[current_game.playerCount]);
+        const roles = roleListConstructor(current_game);
 
         for (let i = 0; i < current_game.playerCount; i++) {
           current_game.players[i].role = roles[i];
@@ -91,42 +69,70 @@ async function execute(message, args, user) {
 async function notifyRoles(message, current_game, roles) {
   for (let i = 0; i < current_game.playerCount; i++) {
     const player = current_game.players[i];
-    if (roles[i] === "fascist" || (roles[i] === "hitler" && current_game.customGameSettings.hitKnowsFas)) {
+    if (
+      ["fascist", "morgana"].includes(roles[i]) ||
+      (roles[i] === "hitler" && current_game.customGameSettings.hitKnowsFas)
+    ) {
       for (let j = 0; j < current_game.playerCount; j++) {
-        if (i !== j && (roles[j] === "fascist" || roles[j] === "hitler")) {
+        if (i !== j && ["fascist", "hitler", "morgana"].includes(roles[j])) {
           await sendDM(
             message,
             current_game,
-            `The player <@${current_game.players[j].id}> in seat **${current_game.players[j].seat + 1}** is **${roles[j]}**`,
+            `The player <@${current_game.players[j].id}> in seat **${
+              current_game.players[j].seat + 1
+            }** is **${roles[j]}**.`,
             current_game.players[i].id
           );
         } else if (i !== j && roles[j] === "monarchist") {
           await sendDM(
             message,
             current_game,
-            `The player <@${current_game.players[j].id}> in seat **${current_game.players[j].seat + 1}** is a **fascist**`,
+            `The player <@${current_game.players[j].id}> in seat **${
+              current_game.players[j].seat + 1
+            }** is **fascist**.`,
             current_game.players[i].id
           );
         }
       }
     } else if (roles[i] === "merlin") {
       for (let j = 0; j < current_game.playerCount; j++) {
-        if (roles[j] === "fascist" || roles[j] === "monarchist" || roles[j] === "hitler") {
+        if (["fascist", "monarchist", "hitler", "morgana"].includes(roles[j])) {
           await sendDM(
             message,
             current_game,
-            `The player <@${current_game.players[j].id}> in seat **${current_game.players[j].seat + 1}** is a fascist-aligned role`,
+            `The player <@${current_game.players[j].id}> in seat **${
+              current_game.players[j].seat + 1
+            }** is **fascist**.`,
             current_game.players[i].id
           );
         }
       }
     } else if (roles[i] === "monarchist") {
       for (let j = 0; j < current_game.playerCount; j++) {
-        if (i !== j && roles[j] === "fascist") {
+        if (i !== j && ["fascist", "morgana"].includes(roles[j])) {
           await sendDM(
             message,
             current_game,
-            `The player <@${current_game.players[j].id}> in seat **${current_game.players[j].seat + 1}** is a **fascist**`,
+            `The player <@${current_game.players[j].id}> in seat **${
+              current_game.players[j].seat + 1
+            }** is **fascist**.`,
+            current_game.players[i].id
+          );
+        }
+      }
+    } else if (roles[i] === "percival") {
+      for (let j = 0; j < current_game.playerCount; j++) {
+        if (
+          i !== j &&
+          (["merlin", "morgana"].includes(roles[j]) ||
+            (current_game.playerCount < 7 && roles[j] === "monarchist"))
+        ) {
+          await sendDM(
+            message,
+            current_game,
+            `The player <@${current_game.players[j].id}> in seat **${
+              current_game.players[j].seat + 1
+            }** could be **merlin**.`,
             current_game.players[i].id
           );
         }

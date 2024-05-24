@@ -1,8 +1,10 @@
-const {EmbedBuilder, ChannelType} = require("discord.js");
+const { EmbedBuilder, ChannelType } = require("discord.js");
 const _ = require("lodash");
 
 const errorMessage = (message) => {
-  return {embeds: [new EmbedBuilder().setDescription(message).setColor("#ff0000")]};
+  return {
+    embeds: [new EmbedBuilder().setDescription(message).setColor("#ff0000")],
+  };
 };
 
 const policyMap = {
@@ -40,6 +42,12 @@ const gameStateMessage = (message, game) => {
       ? "Nein"
       : ""
   );
+  const roles = _.range(0, game.players.length).map((i) =>
+    !["liberal", "merlin", "percival"].includes(game.players[i].role) &&
+    game.gameState.phase === "assassinationWait"
+      ? `: ${game.players[i].role}`
+      : ""
+  );
 
   const emojis = {
     null: "⬛",
@@ -64,15 +72,15 @@ const gameStateMessage = (message, game) => {
         .join("")}\n\n${game.players
         .map(
           (player) =>
-            `${deads[player.seat]}${votes[player.seat]} ${player.seat+1}\\. <@${
-              player.id
-            }> ${pres[player.seat]}${chanc[player.seat]}${TL[player.seat]}${
-              deads[player.seat]
-            }`
+            `${deads[player.seat]}${votes[player.seat]} ${
+              player.seat + 1
+            }\\. <@${player.id}> ${pres[player.seat]}${chanc[player.seat]}${
+              TL[player.seat]
+            }${deads[player.seat]}${roles[player.seat]}`
         )
         .join("\n")}`
     )
-    .setFooter({ text: `Waiting on: ${game.gameState.phase.slice(0, -4)}`});
+    .setFooter({ text: `Waiting on: ${game.gameState.phase.slice(0, -4)}` });
   if (message.channel.type === ChannelType.DM) {
     const guild = message.client.guilds.cache.get(game.guild_id);
     const channel = guild.channels.cache.get(game.channel_id);
@@ -104,24 +112,59 @@ async function sendDM(message, game, dmText, id) {
 async function checkGameEnd(message, game) {
   if (
     !(
-      game.gameState.lib === 5 ||
+      (game.gameState.lib === 5 && !game.gameSetting.avalon) ||
       game.gameState.fas === 6 ||
       game.gameState.hitlerElected ||
-      game.gameState.hitlerDead
+      (game.gameState.hitlerDead && !game.gameSetting.avalon) ||
+      game.gameState.assassinatedPlayer > -1 ||
+      (game.gameSetting.noTopdecking &&
+        game.gameState.topDecks === game.gameSetting.noTopdecking)
     )
   ) {
     return;
   }
   let end_method;
+  let winning_players;
   if (game.gameState.lib === 5) {
-    end_method = "Five liberal policies were enacted! Liberals win!";
+    if (game.gameSetting.avalon) {
+      if (game.players[game.gameState.assassinatedPlayer].role === "merlin") {
+        end_method =
+          "Five liberal policies were enacted, but Merlin was assassinated! Fascists win!";
+        winning_players = ["fascist", "morgana", "monarchist", "hitler"];
+      } else {
+        end_method =
+          "Five liberal policies were enacted, and Merlin survived! Liberals win!";
+        winning_players = ["liberal", "percival", "merlin"];
+      }
+    } else {
+      end_method = "Five liberal policies were enacted! Liberals win!";
+      winning_players = ["liberal"];
+    }
   } else if (game.gameState.fas === 6) {
     end_method = "Six fascist policies were enacted! Fascists win!";
+    winning_players = ["fascist", "morgana", "monarchist", "hitler"];
   } else if (game.gameState.hitlerElected) {
     end_method = "Hitler was elected Chancellor! Fascists win!";
+    winning_players = ["fascist", "morgana", "hitler"];
   } else if (game.gameState.hitlerDead) {
-    end_method = "Hitler was executed! Liberals win!";
+    if (game.gameSetting.avalon) {
+      if (game.players[game.gameState.assassinatedPlayer].role === "merlin") {
+        end_method =
+          "Hitler was executed, but Merlin was assassinated! Fascists win!";
+        winning_players = ["fascist", "morgana", "monarchist", "hitler"];
+      } else {
+        end_method = "Hitler was executed, and Merlin survived! Liberals win!";
+        winning_players = ["liberal", "percival", "merlin", "monarchist"];
+      }
+    } else {
+      end_method = "Hitler was executed! Liberals win!";
+      winning_players = ["liberal", "monarchist"];
+    }
+  } else if (game.gameState.topDecks === game.gameSetting.noTopdecking) {
+    end_method = "The Hammer has been failed! Fascists win!";
+    winning_players = ["fascist", "morgana", "monarchist", "hitler"];
   }
+
   const deads = _.range(0, game.players.length).map((i) =>
     game.gameState.deadPlayers.includes(i) ? "~~" : ""
   );
@@ -146,16 +189,13 @@ async function checkGameEnd(message, game) {
         )
         .join("\n")}`
     )
-    .setFooter({ text: "GG everybody!"});
+    .setFooter({ text: "GG everybody!" });
   channel.send({ embeds: [embed] });
   const player_games = await game_info.get("player_games");
   for (let i = 0; i < game.players.length; i++) {
-    let result;
-    if (game.gameState.lib === 5 || game.gameState.hitlerDead) {
-      result = game.players[i].role === "liberal" ? "won!" : "lost.";
-    } else if (game.gameState.fas === 6 || game.gameState.hitlerElected) {
-      result = game.players[i].role === "liberal" ? "lost." : "won!";
-    }
+    let result = winning_players.includes(game.players[i].role)
+      ? "won!"
+      : "lost.";
     sendDM(
       message,
       game,
@@ -203,16 +243,85 @@ const shuffleArray = (array) => {
   return array;
 };
 
-const topDeckCheck = (game) => {
+const roleListConstructor = (game) => {
+  const roleConfigs = {
+    5: ["liberal", "hitler"],
+    6: ["liberal", "liberal", "hitler"],
+    7: ["liberal", "liberal", "hitler"],
+    8: ["liberal", "liberal", "liberal", "hitler"],
+    9: ["liberal", "liberal", "liberal", "fascist", "hitler"],
+    10: ["liberal", "liberal", "liberal", "liberal", "fascist", "hitler"],
+  };
+
+  const secondLiberal =
+    game.gameSetting.avalon && game.gameSetting.avalonSH.withPercival
+      ? "percival"
+      : "liberal";
+  const secondFascist =
+    game.gameSetting.avalon && game.gameSetting.avalonSH.withPercival
+      ? "morgana"
+      : "fascist";
+  if (game.customGameSettings.monarchist && game.customGameSettings.avalon) {
+    if (game.playerCount < 7) {
+      roleConfigs[game.playerCount].push("merlin", secondLiberal, "monarchist");
+    } else {
+      roleConfigs[game.playerCount].push(
+        "merlin",
+        secondLiberal,
+        "monarchist",
+        secondFascist
+      );
+    }
+  } else if (game.customGameSettings.monarchist) {
+    if (game.playerCount < 7) {
+      roleConfigs[game.playerCount].push("liberal", "liberal", "monarchist");
+    } else {
+      roleConfigs[game.playerCount].push(
+        "liberal",
+        "liberal",
+        "monarchist",
+        "fascist"
+      );
+    }
+  } else if (game.customGameSettings.avalon) {
+    if (game.playerCount < 7) {
+      roleConfigs[game.playerCount].push(
+        "merlin",
+        secondLiberal,
+        secondFascist
+      );
+    } else {
+      roleConfigs[game.playerCount].push(
+        "merlin",
+        secondLiberal,
+        "fascist",
+        secondFascist
+      );
+    }
+  } else {
+    if (game.playerCount < 7) {
+      roleConfigs[game.playerCount].push("liberal", "liberal", "fascist");
+    } else {
+      roleConfigs[game.playerCount].push(
+        "liberal",
+        "liberal",
+        "fascist",
+        "fascist"
+      );
+    }
+  }
+
+  return shuffleArray(roleConfigs[game.playerCount]);
+};
+
+const reshuffleCheck = (game) => {
   if (game.gameState.deck.length < 3) {
     game.gameState.deck = shuffleArray(
-      game.gameState.deck.concat(
-        game.gameState.discard
-      )
+      game.gameState.deck.concat(game.gameState.discard)
     );
     game.gameState.discard = [];
   }
-}
+};
 
 module.exports = {
   errorMessage,
@@ -221,6 +330,7 @@ module.exports = {
   gameStateMessage,
   advancePres,
   checkGameEnd,
-  topDeckCheck,
+  reshuffleCheck,
   policyMap,
+  roleListConstructor,
 };

@@ -6,7 +6,7 @@ const {
   advancePres,
   checkGameEnd,
   policyMap,
-  topDeckCheck,
+  reshuffleCheck,
 } = require("../message-helpers");
 const _ = require("lodash");
 
@@ -22,6 +22,7 @@ async function execute(message, args, user) {
         message.author.id
     ) {
       current_game.gameState.failedGovs = 0;
+      current_game.gameState.topDecks = 0;
       current_game.gameState.chancellorHand.splice(
         current_game.gameState.chancellorHand.indexOf(args[0]),
         1
@@ -43,6 +44,7 @@ async function execute(message, args, user) {
         current_game.logs.push(current_game.gameState.log);
         current_game.gameState.log = {};
         current_game.gameState.lib++;
+        if (current_game.gameSetting.avalon && current_game.gameState.lib === 5) current_game.gameState.phase = "assassinWait";
       } else {
         current_game.gameState.fas++;
         const power_slot =
@@ -69,7 +71,7 @@ async function execute(message, args, user) {
           current_game.gameState.log.investigatorId =
             current_game.gameState.presidentId;
         } else if (power_slot === "peek") {
-          topDeckCheck(current_game);
+          reshuffleCheck(current_game);
           const peek_draw = current_game.gameState.deck.slice(
             current_game.gameState.deck.length - 3
           );
@@ -104,7 +106,7 @@ async function execute(message, args, user) {
           current_game.gameState.phase = "gunWait";
         }
       }
-      topDeckCheck(current_game);
+      reshuffleCheck(current_game);
       gameStateMessage(message, current_game);
       await game_info.set(current_game.game_id, current_game);
       checkGameEnd(message, current_game);

@@ -23,7 +23,7 @@ async function execute(message, args, user) {
         message.author.id
     ) {
       const inv_result =
-        current_game.players[parseInt(args[0])-1].role === "liberal"
+        ["liberal", "merlin", "percival"].includes(current_game.players[parseInt(args[0])-1].role)
           ? "liberal"
           : "fascist";
       sendDM(

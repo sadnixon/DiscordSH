@@ -6,18 +6,19 @@ async function execute(message, args, user) {
     let playerCount;
     let monarchist = false;
     let avalon = false;
+    let percy = false;
 
     // Check for arguments and gamemodes (case-insensitive)
     if (args && args.length > 0) {
-      playerCount = parseInt(args[0], 10); // Get player count from command arguments
-      args.slice(1).forEach((arg) => {
-        const lowerArg = arg.toLowerCase();
-        if (lowerArg === "monarchist") monarchist = true;
-        if (lowerArg === "avalon") avalon = true;
-      });
+      if (args.map((e) => e.toLowerCase()).includes("monarchist")) monarchist = true;
+      if (args.map((e) => e.toLowerCase()).includes("avalon")) {
+        avalon = true;
+        if (args.map((e) => e.toLowerCase()).includes("percival")) percy = true;
+      }
+      playerCount = args.find(num => parseInt(num) >= 5 && parseInt(num) <= 10);
     } else {
       // If no player count is specified, prompt the user to provide it
-      message.channel.send("Please specify the number of players (between 5 and 10).");
+      message.channel.send(errorMessage("Please specify the number of players (between 5 and 10)."));
       return;
     }
 
@@ -30,7 +31,7 @@ async function execute(message, args, user) {
       powers = [null, null, "peek", "bullet", "bullet"];
     } else if (playerCount === 9 || playerCount === 10) {
       powers = ["investigate", "investigate", "election", "bullet", "bullet"];
-    } else {
+    } else if (playerCount === 7 || playerCount === 8) {
       powers = [null, "investigate", "election", "bullet", "bullet"];
     }
 
@@ -58,7 +59,7 @@ async function execute(message, args, user) {
         casualGame: true,
         practiceGame: false,
         unlistedGame: false,
-        avalonSH: null,
+        avalonSH: avalon ? { withPercival: percy } : null,
         noTopdecking: 0,
       },
       players: [],
@@ -93,8 +94,10 @@ async function execute(message, args, user) {
         phase: "joinWait",
         deadPlayers: [],
         invPlayers: [],
+        topDecks: 0,
         hitlerElected: false,
         hitlerDead: false,
+        assassinatedPlayer: -1,
         log: {},
       },
     };
@@ -102,12 +105,13 @@ async function execute(message, args, user) {
     await game_info.set(game_id, game_data);
 
     let gameModeMessage;
+    const percyMessage = percy ? " with Percival" : "";
     if (monarchist && avalon) {
-      gameModeMessage = " Monarchist and Avalon modes enabled.";
+      gameModeMessage = ` Monarchist and Avalon${percyMessage} modes enabled.`;
     } else if (monarchist) {
       gameModeMessage = " Monarchist mode enabled.";
     } else if (avalon) {
-      gameModeMessage = " Avalon mode enabled.";
+      gameModeMessage = ` Avalon${percyMessage} mode enabled.`;
     } else {
       gameModeMessage = " Vanilla Secret Hitler mode enabled.";
     }

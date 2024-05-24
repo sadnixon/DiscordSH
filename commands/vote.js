@@ -6,7 +6,7 @@ const {
   advancePres,
   checkGameEnd,
   policyMap,
-  topDeckCheck,
+  reshuffleCheck,
 } = require("../message-helpers");
 const _ = require("lodash");
 
@@ -108,24 +108,40 @@ async function execute(message, args, user) {
           advancePres(current_game);
           if (current_game.gameState.failedGovs > 2) {
             current_game.gameState.failedGovs = 0;
-            const top_deck = current_game.gameState.deck.pop();
-            current_game.gameState.log.enactedPolicy = policyMap[top_deck];
-            if (top_deck === "B") {
-              current_game.gameState.lib++;
-            } else {
-              current_game.gameState.fas++;
+            current_game.gameState.topDecks++;
+            if (
+              !(
+                current_game.gameSetting.noTopdecking &&
+                current_game.gameState.topDecks ===
+                  current_game.gameSetting.noTopdecking
+              )
+            ) {
+              const top_deck = current_game.gameState.deck.pop();
+              current_game.gameState.log.enactedPolicy = policyMap[top_deck];
+              if (top_deck === "B") {
+                current_game.gameState.lib++;
+                if (
+                  current_game.gameSetting.avalon &&
+                  current_game.gameState.lib === 5
+                )
+                  current_game.gameState.phase = "assassinWait";
+              } else {
+                current_game.gameState.fas++;
+              }
+              current_game.gameState.lastPresidentId = -1;
+              current_game.gameState.lastChancellorId = -1;
+              reshuffleCheck(current_game);
             }
-            current_game.gameState.lastPresidentId = -1;
-            current_game.gameState.lastChancellorId = -1;
-            topDeckCheck(current_game);
           }
-          const deckState = current_game.gameState.deck.map(
-            (e) => policyMap[e]
-          );
-          deckState.reverse();
-          current_game.gameState.log.deckState = deckState;
-          current_game.logs.push(current_game.gameState.log);
-          current_game.gameState.log = {};
+          if (current_game.gameState.phase !== "assassinWait") {
+            const deckState = current_game.gameState.deck.map(
+              (e) => policyMap[e]
+            );
+            deckState.reverse();
+            current_game.gameState.log.deckState = deckState;
+            current_game.logs.push(current_game.gameState.log);
+            current_game.gameState.log = {};
+          }
         }
         gameStateMessage(message, current_game);
         current_game.gameState.votes = Array(current_game.playerCount).fill(

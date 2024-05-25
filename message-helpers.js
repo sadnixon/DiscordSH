@@ -10,6 +10,7 @@ const errorMessage = (message) => {
 const policyMap = {
   B: "liberal",
   R: "fascist",
+  C: "communist",
 };
 
 const gameStateMessage = (message, game) => {
@@ -55,32 +56,48 @@ const gameStateMessage = (message, game) => {
     election: "🗳️",
     peek: "👀",
     bullet: "🔫",
+    bugging: "🐞",
+    radicalization: "✊",
+    fiveYearPlan: "✊",
+    congress: "🏢",
+    confession: "📓",
   };
+
   const lib_emoji_list = ["⬛", "⬛", "⬛", "⬛", "🕊️"];
+  const communist_emoji_list = ["🐞", "✊", "🖐️", "🏢", "📓", "🔨"];
   let emoji_list = game.customGameSettings.powers.map((e) => emojis[e]);
   emoji_list.push("💀");
 
+  let embedDescription = `${"🟦".repeat(game.gameState.lib)}${lib_emoji_list
+    .slice(game.gameState.lib)
+    .join("")}\n${"⭕".repeat(game.gameState.failedGovs)}${"⚫".repeat(
+    3 - game.gameState.failedGovs
+  )}\n${"🟥".repeat(game.gameState.fas)}${emoji_list
+    .slice(game.gameState.fas)
+    .join("")}`;
+
+  if (game.customGameSettings.communist) {
+    embedDescription += `\n${"🟥".repeat(game.gameState.comm)}${communist_emoji_list
+      .slice(game.gameState.comm)
+      .join("")}`;
+  }
+
+  embedDescription += `\n\n${game.players
+    .map(
+      (player) =>
+        `${deads[player.seat]}${votes[player.seat]} ${
+          player.seat + 1
+        }\\. <@${player.id}> ${pres[player.seat]}${chanc[player.seat]}${
+          TL[player.seat]
+        }${deads[player.seat]}${roles[player.seat]}`
+    )
+    .join("\n")}`;
+
   const embed = new EmbedBuilder()
     .setTitle("Gamestate Update")
-    .setDescription(
-      `${"🟦".repeat(game.gameState.lib)}${lib_emoji_list
-        .slice(game.gameState.lib)
-        .join("")}\n${"⭕".repeat(game.gameState.failedGovs)}${"⚫".repeat(
-        3 - game.gameState.failedGovs
-      )}\n${"🟥".repeat(game.gameState.fas)}${emoji_list
-        .slice(game.gameState.fas)
-        .join("")}\n\n${game.players
-        .map(
-          (player) =>
-            `${deads[player.seat]}${votes[player.seat]} ${
-              player.seat + 1
-            }\\. <@${player.id}> ${pres[player.seat]}${chanc[player.seat]}${
-              TL[player.seat]
-            }${deads[player.seat]}${roles[player.seat]}`
-        )
-        .join("\n")}`
-    )
+    .setDescription(embedDescription)
     .setFooter({ text: `Waiting on: ${game.gameState.phase.slice(0, -4)}` });
+
   if (message.channel.type === ChannelType.DM) {
     const guild = message.client.guilds.cache.get(game.guild_id);
     const channel = guild.channels.cache.get(game.channel_id);
@@ -114,6 +131,7 @@ async function checkGameEnd(message, game) {
     !(
       (game.gameState.lib === 5 && !game.customGameSettings.avalon) ||
       game.gameState.fas === 6 ||
+      game.gameState.comm === 6 ||
       game.gameState.hitlerElected ||
       (game.gameState.hitlerDead && !game.customGameSettings.avalon) ||
       game.gameState.assassinatedPlayer > -1 ||
@@ -143,6 +161,9 @@ async function checkGameEnd(message, game) {
   } else if (game.gameState.fas === 6) {
     end_method = "Six fascist policies were enacted! Fascists win!";
     winning_players = ["fascist", "morgana", "monarchist", "hitler"];
+  } else if (game.gameState.comm === 6) {
+    end_method = "Six communist policies were enacted! Communists win!";
+    winning_players = ["communist"];
   } else if (game.gameState.hitlerElected) {
     end_method = "Hitler was elected Chancellor! Fascists win!";
     winning_players = ["fascist", "morgana", "hitler"];

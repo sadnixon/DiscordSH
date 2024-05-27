@@ -3,7 +3,7 @@ const {
   shuffleArray,
   sendDM,
   gameStateMessage,
-  policyMap
+  policyMap,
 } = require("../message-helpers");
 const _ = require("lodash");
 
@@ -29,19 +29,30 @@ async function execute(message, args, user) {
         current_game.gameState.presidentHand.splice(0, 2);
       current_game.gameState.log.chancellorHand =
         current_game.gameState.chancellorHand.map((e) => policyMap[e]);
-      const dmHeader = `You have been passed **${current_game.gameState.chancellorHand.join("")}**.`
+      const dmHeader = `You have been passed **${current_game.gameState.chancellorHand.join(
+        ""
+      )}**.`;
       let dmText;
+      const color = current_game.gameState.chancellorHand.includes("B")
+        ? current_game.gameState.chancellorHand.includes("R")
+          ? "neutral"
+          : "liberal"
+        : "fascist";
       if (
         current_game.gameState.fas >= current_game.customGameSettings.vetoZone
       ) {
         current_game.gameState.phase = "vetoWait";
-        dmText = "Vote Ja to veto playing either of these policies, or vote Nein to select a policy to play.";
+        dmText =
+          "Vote Ja to veto playing either of these policies, or vote Nein to select a policy to play.";
         sendDM(
           message,
           current_game,
-          `You passed your chancellor **${current_game.gameState.chancellorHand.join("")}**.`,
+          `You passed your chancellor **${current_game.gameState.chancellorHand.join(
+            ""
+          )}**.`,
           `Vote Ja to veto playing either of these policies, or vote Nein to allow your chancellor to select a policy.`,
-          message.author.id
+          message.author.id,
+          color
         );
       } else {
         dmText = "Please choose a card to play.";
@@ -51,7 +62,8 @@ async function execute(message, args, user) {
         current_game,
         dmHeader,
         dmText,
-        current_game.players[current_game.gameState.chancellorId].id
+        current_game.players[current_game.gameState.chancellorId].id,
+        color
       );
       await game_info.set(current_game.game_id, current_game);
     } else {

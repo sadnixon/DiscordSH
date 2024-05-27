@@ -53,7 +53,7 @@ async function execute(message, args, user) {
         ].includes(vote_index)
       ) {
         return message.channel.send(errorMessage("You can't veto this!"));
-      }      
+      }
       if (args[0].toLowerCase() === "ja") {
         vote_index === current_game.gameState.presidentId
           ? (current_game.gameState.presidentVeto = true)
@@ -132,12 +132,20 @@ async function execute(message, args, user) {
           }
         } else {
           current_game.gameState.phase = "chancWait";
+          const color = current_game.gameState.chancellorHand.includes("B")
+            ? current_game.gameState.chancellorHand.includes("R")
+              ? "neutral"
+              : "liberal"
+            : "fascist";
           sendDM(
             message,
             current_game,
-            `You have been passed **${current_game.gameState.chancellorHand.join("")}**.`,
+            `You have been passed **${current_game.gameState.chancellorHand.join(
+              ""
+            )}**.`,
             "Please choose a card to play.",
-            current_game.players[current_game.gameState.chancellorId].id
+            current_game.players[current_game.gameState.chancellorId].id,
+            color
           );
         }
         gameStateMessage(message, current_game);

@@ -94,12 +94,20 @@ async function execute(message, args, user) {
           }
           current_game.gameState.log.presidentHand =
             current_game.gameState.presidentHand.map((e) => policyMap[e]);
+          const color = current_game.gameState.presidentHand.includes("B")
+            ? current_game.gameState.presidentHand.includes("R")
+              ? "neutral"
+              : "liberal"
+            : "fascist";
           sendDM(
             message,
             current_game,
-            `You have drawn **${current_game.gameState.presidentHand.join("")}**.`,
+            `You have drawn **${current_game.gameState.presidentHand.join(
+              ""
+            )}**.`,
             "Please choose a card to discard.",
-            current_game.players[current_game.gameState.presidentId].id
+            current_game.players[current_game.gameState.presidentId].id,
+            color
           );
         } else {
           current_game.gameState.phase = "nomWait";

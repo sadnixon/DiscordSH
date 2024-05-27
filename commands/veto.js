@@ -26,15 +26,15 @@ async function execute(message, args, user) {
       let vote_index = current_game.player_ids[message.author.id];
       if (
         args.length > 1 &&
-        current_game.players[parseInt(args[1])].id === message.author.id
+        current_game.players[parseInt(args[1]) - 1].id === message.author.id
       ) {
         if (
           [
             current_game.gameState.presidentId,
             current_game.gameState.chancellorId,
-          ].includes(parseInt(args[1]))
+          ].includes(parseInt(args[1]) - 1)
         ) {
-          vote_index = parseInt(args[1]);
+          vote_index = parseInt(args[1] - 1);
         } else {
           if (
             current_game.players[current_game.gameState.presidentId].id ==
@@ -53,8 +53,7 @@ async function execute(message, args, user) {
         ].includes(vote_index)
       ) {
         return message.channel.send(errorMessage("You can't veto this!"));
-      }
-
+      }      
       if (args[0].toLowerCase() === "ja") {
         vote_index === current_game.gameState.presidentId
           ? (current_game.gameState.presidentVeto = true)
@@ -64,7 +63,7 @@ async function execute(message, args, user) {
           ? (current_game.gameState.presidentVeto = false)
           : (current_game.gameState.chancellorVeto = false);
       }
-
+      console.log(current_game.gameState);
       if (
         current_game.gameState.presidentVeto !== null &&
         current_game.gameState.chancellorVeto !== null

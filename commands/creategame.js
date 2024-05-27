@@ -1,4 +1,8 @@
-const { errorMessage, standardEmbed, shuffleArray } = require("../message-helpers");
+const {
+  errorMessage,
+  standardEmbed,
+  shuffleArray,
+} = require("../message-helpers");
 
 async function execute(message, args, user) {
   const channels = await game_info.get("game_channels");
@@ -10,20 +14,29 @@ async function execute(message, args, user) {
 
     // Check for arguments and gamemodes (case-insensitive)
     if (args && args.length > 0) {
-      if (args.map((e) => e.toLowerCase()).includes("monarchist")) monarchist = true;
+      if (args.map((e) => e.toLowerCase()).includes("monarchist"))
+        monarchist = true;
       if (args.map((e) => e.toLowerCase()).includes("avalon")) {
         avalon = true;
         if (args.map((e) => e.toLowerCase()).includes("percival")) percy = true;
       }
-      playerCount = parseInt(args.find(num => parseInt(num) >= 5 && parseInt(num) <= 10));
+      playerCount = parseInt(
+        args.find((num) => parseInt(num) >= 5 && parseInt(num) <= 10)
+      );
     } else {
       // If no player count is specified, prompt the user to provide it
-      message.channel.send(errorMessage("Please specify the number of players (between 5 and 10)."));
+      message.channel.send(
+        errorMessage("Please specify the number of players (between 5 and 10).")
+      );
       return;
     }
 
     if (isNaN(playerCount) || playerCount < 5 || playerCount > 10) {
-      message.channel.send(errorMessage("Invalid player count. Please specify a number between 5 and 10."));
+      message.channel.send(
+        errorMessage(
+          "Invalid player count. Please specify a number between 5 and 10."
+        )
+      );
       return;
     }
 
@@ -63,7 +76,7 @@ async function execute(message, args, user) {
         avalonSH: avalon ? { withPercival: percy } : null,
         noTopdecking: 0,
       },
-      players: [],
+      players: [{ id: message.author.id }],
       logs: [],
       playerCount: playerCount,
       player_ids: {},
@@ -76,10 +89,22 @@ async function execute(message, args, user) {
         failedGovs: 0,
         specialElected: -1,
         deck: shuffleArray([
-          "R", "R", "R", "R",
-          "R", "R", "R", "R",
-          "R", "R", "R", "B",
-          "B", "B", "B", "B",
+          "R",
+          "R",
+          "R",
+          "R",
+          "R",
+          "R",
+          "R",
+          "R",
+          "R",
+          "R",
+          "R",
+          "B",
+          "B",
+          "B",
+          "B",
+          "B",
           "B",
         ]),
         discard: [],
@@ -102,6 +127,10 @@ async function execute(message, args, user) {
         log: {},
       },
     };
+
+    const player_games = await game_info.get("player_games");
+    player_games[message.author.id] = channels[message.channel.id];
+    await game_info.set("player_games", player_games);
     await game_info.set("game_channels", channels);
     await game_info.set(game_id, game_data);
 
@@ -117,9 +146,19 @@ async function execute(message, args, user) {
       gameModeMessage = "Vanilla Secret Hitler mode enabled.";
     }
 
-    message.channel.send(standardEmbed(`Game created for ${playerCount} players!`,gameModeMessage));
+    await message.channel.send(
+      standardEmbed(`Game created for ${playerCount} players!`, gameModeMessage)
+    );
+    await message.channel.send(
+      standardEmbed(
+        `Seats filled: 1/${playerCount}`,
+        `<@${message.author.id}> has joined the game!`
+      )
+    );
   } else {
-    message.channel.send(errorMessage("A game already exists in this channel!"));
+    await message.channel.send(
+      errorMessage("A game already exists in this channel!")
+    );
   }
 }
 

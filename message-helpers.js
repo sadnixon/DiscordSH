@@ -58,7 +58,7 @@ const gameStateMessage = (message, game) => {
     bullet: "🔫",
     bugging: "🐞",
     radicalization: "✊",
-    fiveYearPlan: "✊",
+    fiveYearPlan: "🖐️",
     congress: "🏢",
     confession: "📓",
   };

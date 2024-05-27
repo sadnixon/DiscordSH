@@ -135,9 +135,8 @@ async function execute(message, args, user) {
           sendDM(
             message,
             current_game,
-            `You have been passed **${current_game.gameState.chancellorHand.join(
-              ""
-            )}**. Please choose a card to play.`,
+            `You have been passed **${current_game.gameState.chancellorHand.join("")}**.`,
+            "Please choose a card to play.",
             current_game.players[current_game.gameState.chancellorId].id
           );
         }

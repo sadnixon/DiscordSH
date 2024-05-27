@@ -82,6 +82,7 @@ async function execute(message, args, user) {
           sendDM(
             message,
             current_game,
+            "Deck Peek Results:",
             `You have peeked at **${peek_draw.join(
               ""
             )}** in that order (top on the left).`,

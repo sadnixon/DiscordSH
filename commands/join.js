@@ -4,6 +4,7 @@ const {
   sendDM,
   gameStateMessage,
   roleListConstructor,
+  roleLists,
 } = require("../message-helpers");
 
 async function execute(message, args, user) {
@@ -44,8 +45,10 @@ async function execute(message, args, user) {
           await sendDM(
             message,
             current_game,
+            "Role Assignment:",
             `Your seat is **${i + 1}** and your role is **${roles[i]}**`,
-            current_game.players[i].id
+            current_game.players[i].id,
+            roleLists.liberal.includes(roles[i]) ? "liberal" : "fascist"
           );
         }
 
@@ -78,19 +81,23 @@ async function notifyRoles(message, current_game, roles) {
           await sendDM(
             message,
             current_game,
+            "Role Notification:",
             `The player <@${current_game.players[j].id}> in seat **${
               current_game.players[j].seat + 1
             }** is **${roles[j]}**.`,
-            current_game.players[i].id
+            current_game.players[i].id,
+            "fascist"
           );
         } else if (i !== j && roles[j] === "monarchist") {
           await sendDM(
             message,
             current_game,
+            "Role Notification:",
             `The player <@${current_game.players[j].id}> in seat **${
               current_game.players[j].seat + 1
             }** is **fascist**.`,
-            current_game.players[i].id
+            current_game.players[i].id,
+            "fascist"
           );
         }
       }
@@ -100,10 +107,12 @@ async function notifyRoles(message, current_game, roles) {
           await sendDM(
             message,
             current_game,
+            "Role Notification:",
             `The player <@${current_game.players[j].id}> in seat **${
               current_game.players[j].seat + 1
             }** is **fascist**.`,
-            current_game.players[i].id
+            current_game.players[i].id,
+            "fascist"
           );
         }
       }
@@ -113,10 +122,12 @@ async function notifyRoles(message, current_game, roles) {
           await sendDM(
             message,
             current_game,
+            "Role Notification:",
             `The player <@${current_game.players[j].id}> in seat **${
               current_game.players[j].seat + 1
             }** is **fascist**.`,
-            current_game.players[i].id
+            current_game.players[i].id,
+            "fascist"
           );
         }
       }
@@ -130,10 +141,12 @@ async function notifyRoles(message, current_game, roles) {
           await sendDM(
             message,
             current_game,
+            "Role Notification:",
             `The player <@${current_game.players[j].id}> in seat **${
               current_game.players[j].seat + 1
             }** could be **merlin**.`,
-            current_game.players[i].id
+            current_game.players[i].id,
+            "liberal"
           );
         }
       }

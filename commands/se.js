@@ -1,7 +1,6 @@
 const {
   errorMessage,
   gameStateMessage,
-  sendDM,
   policyMap,
 } = require("../message-helpers");
 const _ = require("lodash");

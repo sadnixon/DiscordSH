@@ -7,10 +7,32 @@ const errorMessage = (message) => {
   };
 };
 
+const colorMap = {
+  fascist: "#763A35",
+  liberal: "334765",
+  neutral: "#EAE6B1",
+}
+
+const standardEmbed = (header, message, team = "neutral") => {
+  return {
+    embeds: [
+      new EmbedBuilder()
+        .setTitle(header)
+        .setDescription(message)
+        .setColor(colorMap[team]),
+    ],
+  };
+};
+
 const policyMap = {
   B: "liberal",
   R: "fascist",
 };
+
+const roleLists = {
+  liberal: ["liberal","percival","merlin"],
+  fascist: ["fascist","morgana","hitler","monarchist"]
+}
 
 async function gameStateMessage(message, game) {
   const deads = _.range(0, game.players.length).map((i) =>
@@ -80,7 +102,8 @@ async function gameStateMessage(message, game) {
         )
         .join("\n")}`
     )
-    .setFooter({ text: `Waiting on: ${game.gameState.phase.slice(0, -4)}` });
+    .setFooter({ text: `Waiting on: ${game.gameState.phase.slice(0, -4)}` })
+    .setColor(colorMap["neutral"]);
   if (message.channel.type === ChannelType.DM) {
     const guild = await message.client.guilds.fetch(game.guild_id);
     const channel = await guild.channels.fetch(game.channel_id);
@@ -88,23 +111,29 @@ async function gameStateMessage(message, game) {
   } else {
     await message.channel.send({ embeds: [embed] });
   }
-};
+}
 
-async function sendDM(message, game, dmText, id) {
+async function sendDM(message, game, dmHeader, dmText, id, color = "neutral") {
   let player_disc;
   if (message.channel.type === ChannelType.DM) {
     const guild = await message.client.guilds.fetch(game.guild_id);
     player_disc = await guild.members.fetch(`${id}`).catch(() => null);
-    if (!player_disc) return message.channel.send("User not found:(");
+    if (!player_disc)
+      return message.channel.send(errorMessage("User not found:("));
   } else {
     player_disc = await message.guild.members.fetch(`${id}`).catch(() => null);
-    if (!player_disc) return message.channel.send("User not found:(");
+    if (!player_disc)
+      return message.channel.send(errorMessage("User not found:("));
   }
-  return await player_disc.send(dmText).catch(() => {
-    message.channel.send(
-      "User has DMs closed or has no mutual servers with the bot:("
-    );
-  });
+  return await player_disc
+    .send(standardEmbed(dmHeader, dmText, color))
+    .catch(() => {
+      message.channel.send(
+        errorMessage(
+          "User has DMs closed or has no mutual servers with the bot:("
+        )
+      );
+    });
 }
 
 async function checkGameEnd(message, game) {
@@ -162,6 +191,11 @@ async function checkGameEnd(message, game) {
     end_method = "The Hammer has been failed! Fascists win!";
     winning_players = ["fascist", "morgana", "monarchist", "hitler"];
   }
+  const winning_team = ["fascist", "morgana", "monarchist", "hitler"].some(
+    (e) => winning_players.includes(e)
+  )
+    ? "fascist"
+    : "liberal";
 
   const deads = _.range(0, game.players.length).map((i) =>
     game.gameState.deadPlayers.includes(i) ? "~~" : ""
@@ -187,7 +221,8 @@ async function checkGameEnd(message, game) {
         )
         .join("\n")}`
     )
-    .setFooter({ text: "GG everybody!" });
+    .setFooter({ text: "GG everybody!" })
+    .setColor(colorMap[winning_team]);
   channel.send({ embeds: [embed] });
   const player_games = await game_info.get("player_games");
   for (let i = 0; i < game.players.length; i++) {
@@ -197,8 +232,10 @@ async function checkGameEnd(message, game) {
     sendDM(
       message,
       game,
-      `**${end_method}** Since your role is **${game.players[i].role}**, you ${result}`,
-      game.players[i].id
+      `**${end_method}**`,
+      `Since your role is **${game.players[i].role}**, you ${result}`,
+      game.players[i].id,
+      winning_team
     );
     delete player_games[game.players[i].id];
   }
@@ -323,6 +360,7 @@ const reshuffleCheck = (game) => {
 
 module.exports = {
   errorMessage,
+  standardEmbed,
   shuffleArray,
   sendDM,
   gameStateMessage,
@@ -330,5 +368,6 @@ module.exports = {
   checkGameEnd,
   reshuffleCheck,
   policyMap,
+  roleLists,
   roleListConstructor,
 };

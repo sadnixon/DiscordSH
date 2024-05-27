@@ -1,7 +1,6 @@
 const {
   errorMessage,
   gameStateMessage,
-  sendDM,
   advancePres,
   checkGameEnd,
   policyMap,

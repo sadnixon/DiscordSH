@@ -1,4 +1,4 @@
-const { errorMessage, shuffleArray } = require("../message-helpers");
+const { errorMessage, standardEmbed, shuffleArray } = require("../message-helpers");
 
 async function execute(message, args, user) {
   const channels = await game_info.get("game_channels");
@@ -108,16 +108,16 @@ async function execute(message, args, user) {
     let gameModeMessage;
     const percyMessage = percy ? " with Percival" : "";
     if (monarchist && avalon) {
-      gameModeMessage = ` Monarchist and Avalon${percyMessage} modes enabled.`;
+      gameModeMessage = `Monarchist and Avalon${percyMessage} modes enabled.`;
     } else if (monarchist) {
-      gameModeMessage = " Monarchist mode enabled.";
+      gameModeMessage = "Monarchist mode enabled.";
     } else if (avalon) {
-      gameModeMessage = ` Avalon${percyMessage} mode enabled.`;
+      gameModeMessage = `Avalon${percyMessage} mode enabled.`;
     } else {
-      gameModeMessage = " Vanilla Secret Hitler mode enabled.";
+      gameModeMessage = "Vanilla Secret Hitler mode enabled.";
     }
 
-    message.channel.send(`Game created for ${playerCount} players!${gameModeMessage}`);
+    message.channel.send(standardEmbed(`Game created for ${playerCount} players!`,gameModeMessage));
   } else {
     message.channel.send(errorMessage("A game already exists in this channel!"));
   }

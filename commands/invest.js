@@ -29,10 +29,12 @@ async function execute(message, args, user) {
       sendDM(
         message,
         current_game,
+        "Investigation Results:",
         `The player <@${
           current_game.players[parseInt(args[0])-1].id
         }> in seat **${parseInt(args[0])}** is **${inv_result}**`,
-        message.author.id
+        message.author.id,
+        inv_result
       );
       current_game.gameState.phase = "nomWait";
       current_game.gameState.invPlayers.push(parseInt(args[0])-1);

@@ -97,9 +97,8 @@ async function execute(message, args, user) {
           sendDM(
             message,
             current_game,
-            `You have drawn **${current_game.gameState.presidentHand.join(
-              ""
-            )}**. Please choose a card to discard.`,
+            `You have drawn **${current_game.gameState.presidentHand.join("")}**.`,
+            "Please choose a card to discard.",
             current_game.players[current_game.gameState.presidentId].id
           );
         } else {

@@ -12,7 +12,7 @@ const policyMap = {
   R: "fascist",
 };
 
-const gameStateMessage = (message, game) => {
+async function gameStateMessage(message, game) {
   const deads = _.range(0, game.players.length).map((i) =>
     game.gameState.deadPlayers.includes(i) ? "~~" : ""
   );
@@ -82,20 +82,18 @@ const gameStateMessage = (message, game) => {
     )
     .setFooter({ text: `Waiting on: ${game.gameState.phase.slice(0, -4)}` });
   if (message.channel.type === ChannelType.DM) {
-    const guild = message.client.guilds.cache.get(game.guild_id);
-    const channel = guild.channels.cache.get(game.channel_id);
-    channel.send({ embeds: [embed] });
+    const guild = await message.client.guilds.fetch(game.guild_id);
+    const channel = await guild.channels.fetch(game.channel_id);
+    await channel.send({ embeds: [embed] });
   } else {
-    message.channel.send({ embeds: [embed] });
+    await message.channel.send({ embeds: [embed] });
   }
 };
 
 async function sendDM(message, game, dmText, id) {
   let player_disc;
   if (message.channel.type === ChannelType.DM) {
-    const guild = await message.client.guilds.cache
-      .get(game.guild_id)
-      .catch(() => null);
+    const guild = await message.client.guilds.fetch(game.guild_id);
     player_disc = await guild.members.fetch(`${id}`).catch(() => null);
     if (!player_disc) return message.channel.send("User not found:(");
   } else {
@@ -171,8 +169,8 @@ async function checkGameEnd(message, game) {
   let guild;
   let channel;
   if (message.channel.type === ChannelType.DM) {
-    guild = await message.client.guilds.cache.get(game.guild_id);
-    channel = await guild.channels.cache.get(game.channel_id);
+    guild = await message.client.guilds.fetch(game.guild_id);
+    channel = await guild.channels.fetch(game.channel_id);
   } else {
     guild = await message.guild;
     channel = await message.channel;

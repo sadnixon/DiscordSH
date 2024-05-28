@@ -92,21 +92,30 @@ async function gameStateMessage(message, game) {
     bullet: "<:Execution:1245136128508432434>",
     fas_p: "<:FascistPolicy:1245138019476832329>",
     fas_v: "<:FascistVictory:1245136005724508220>",
+    tracker: "<:Tracker:1245147770189385728>",
+    failed: "<:FailedElection:1245147769140936725>",
   };
-  const lib_emoji_list = ["lib", "lib", "lib", "lib", "lib_v"].map((e) => emojis[e]);
+  const lib_emoji_list = ["lib", "lib", "lib", "lib", "lib_v"].map(
+    (e) => emojis[e]
+  );
   let emoji_list = game.customGameSettings.powers.map((e) => emojis[e]);
   emoji_list.push(emojis.fas_v);
+
+  let tracker_emoji_list = ["tracker", "tracker", "tracker"].map(
+    (e) => emojis[e]
+  );
+  if (game.gameState.failedGovs > 0) {
+    tracker_emoji_list[game.gameState.failedGovs - 1] = emojis.failed;
+  }
 
   const embed = new EmbedBuilder()
     .setTitle("Gamestate Update")
     .setDescription(
-      `${emoji_list.lib_p.repeat(game.gameState.lib)}${lib_emoji_list
+      `${emojis.lib_p.repeat(game.gameState.lib)}${lib_emoji_list
         .slice(game.gameState.lib)
-        .join("")}\n${"⭕".repeat(game.gameState.failedGovs)}${"⚫".repeat(
-        3 - game.gameState.failedGovs
-      )}\n${emoji_list.fas_p.repeat(game.gameState.fas)}${emoji_list
-        .slice(game.gameState.fas)
-        .join("")}\n\n${game.players
+        .join("")}\n${tracker_emoji_list.join("")}\n${emojis.fas_p.repeat(
+        game.gameState.fas
+      )}${emoji_list.slice(game.gameState.fas).join("")}\n\n${game.players
         .map(
           (player) =>
             `${deads[player.seat]}${votes[player.seat]} ${

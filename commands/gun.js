@@ -44,6 +44,17 @@ async function execute(message, args, user) {
         current_game.gameState.log = {};
       }
       await game_info.set(current_game.game_id, current_game);
+      await message.channel.send(
+        standardEmbed(
+          `Shot made!`,
+          `${current_game.gameState.lastPresidentId + 1}. <@${
+            message.author.id
+          }> shot ${parseInt(args[0])}. <@${
+            current_game.players[parseInt(args[0]) - 1].id
+          }>`,
+          "fascist"
+        )
+      );
       gameStateMessage(message, current_game);
       checkGameEnd(message, current_game);
     } else if (

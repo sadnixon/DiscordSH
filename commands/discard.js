@@ -4,6 +4,8 @@ const {
   sendDM,
   gameStateMessage,
   policyMap,
+  sendToChannel,
+  standardEmbed,
 } = require("../message-helpers");
 const _ = require("lodash");
 
@@ -44,7 +46,7 @@ async function execute(message, args, user) {
         current_game.gameState.phase = "vetoWait";
         dmText =
           "Vote Ja to veto playing either of these policies, or vote Nein to select a policy to play.";
-        sendDM(
+        await sendDM(
           message,
           current_game,
           `You passed your chancellor **${current_game.gameState.chancellorHand.join(
@@ -57,7 +59,7 @@ async function execute(message, args, user) {
       } else {
         dmText = "Please choose a card to play.";
       }
-      sendDM(
+      await sendDM(
         message,
         current_game,
         dmHeader,
@@ -66,6 +68,16 @@ async function execute(message, args, user) {
         color
       );
       await game_info.set(current_game.game_id, current_game);
+      await sendToChannel(
+        message,
+        current_game,
+        standardEmbed(
+          `Policy Played!`,
+          `${current_game.gameState.presidentId + 1}. <@${
+            message.author.id
+          }> discarded a policy.`
+        )
+      );
     } else {
       message.channel.send(errorMessage("Invalid discard pick!"));
     }

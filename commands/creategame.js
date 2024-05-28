@@ -13,7 +13,7 @@ async function execute(message, args, user) {
     let percy = false;
 
     // Check for arguments and gamemodes (case-insensitive)
-    if (args.length && args.length > 0) {
+    if (args.length) {
       if (args.map((e) => e.toLowerCase()).includes("monarchist"))
         monarchist = true;
       if (args.map((e) => e.toLowerCase()).includes("avalon")) {

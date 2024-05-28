@@ -7,6 +7,8 @@ const {
   checkGameEnd,
   policyMap,
   reshuffleCheck,
+  sendToChannel,
+  standardEmbed,
 } = require("../message-helpers");
 const _ = require("lodash");
 
@@ -31,6 +33,17 @@ async function execute(message, args, user) {
         current_game.gameState.chancellorHand.pop()
       );
       current_game.gameState.log.enactedPolicy = policyMap[args[0]];
+      await sendToChannel(
+        message,
+        current_game,
+        standardEmbed(
+          `Policy Played!`,
+          `${current_game.gameState.chancellorId + 1}. <@${
+            message.author.id
+          }> played a **${policyMap[args[0]]}** policy.`,
+          policyMap[args[0]]
+        )
+      );
       if (args[0] === "B") {
         current_game.gameState.phase = "nomWait";
         current_game.gameState.lastPresidentId =
@@ -44,7 +57,11 @@ async function execute(message, args, user) {
         current_game.logs.push(current_game.gameState.log);
         current_game.gameState.log = {};
         current_game.gameState.lib++;
-        if (current_game.customGameSettings.avalon && current_game.gameState.lib === 5) current_game.gameState.phase = "assassinWait";
+        if (
+          current_game.customGameSettings.avalon &&
+          current_game.gameState.lib === 5
+        )
+          current_game.gameState.phase = "assassinWait";
       } else {
         current_game.gameState.fas++;
         const power_slot =
@@ -79,7 +96,7 @@ async function execute(message, args, user) {
           current_game.gameState.log.policyPeek = peek_draw.map(
             (e) => policyMap[e]
           );
-          sendDM(
+          await sendDM(
             message,
             current_game,
             "Deck Peek Results:",
@@ -87,6 +104,17 @@ async function execute(message, args, user) {
               ""
             )}** in that order (top on the left).`,
             current_game.players[current_game.gameState.presidentId].id
+          );
+          await sendToChannel(
+            message,
+            current_game,
+            standardEmbed(
+              `Deck Peeked!`,
+              `${current_game.gameState.presidentId + 1}. <@${
+                current_game.players[current_game.gameState.presidentId].id
+              }> has peeked at the top 3 cards of the deck`,
+              "fascist"
+            )
           );
           current_game.gameState.phase = "nomWait";
           current_game.gameState.lastPresidentId =
@@ -108,8 +136,8 @@ async function execute(message, args, user) {
         }
       }
       reshuffleCheck(current_game);
-      gameStateMessage(message, current_game);
       await game_info.set(current_game.game_id, current_game);
+      gameStateMessage(message, current_game);
       checkGameEnd(message, current_game);
     } else {
       message.channel.send(errorMessage("Invalid play pick!"));

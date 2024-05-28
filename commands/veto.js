@@ -7,6 +7,7 @@ const {
   checkGameEnd,
   policyMap,
   reshuffleCheck,
+  standardEmbed,
 } = require("../message-helpers");
 const _ = require("lodash");
 
@@ -63,7 +64,9 @@ async function execute(message, args, user) {
           ? (current_game.gameState.presidentVeto = false)
           : (current_game.gameState.chancellorVeto = false);
       }
-      console.log(current_game.gameState);
+      await message.channel.send(
+        standardEmbed("Veto Made.", `You have voted ${args[0]} on the veto.`)
+      );
       if (
         current_game.gameState.presidentVeto !== null &&
         current_game.gameState.chancellorVeto !== null
@@ -137,7 +140,7 @@ async function execute(message, args, user) {
               ? "neutral"
               : "liberal"
             : "fascist";
-          sendDM(
+          await sendDM(
             message,
             current_game,
             `You have been passed **${current_game.gameState.chancellorHand.join(

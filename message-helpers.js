@@ -233,7 +233,7 @@ async function checkGameEnd(message, game) {
     let result = winning_players.includes(game.players[i].role)
       ? "won!"
       : "lost.";
-    sendDM(
+    await sendDM(
       message,
       game,
       `**${end_method}**`,

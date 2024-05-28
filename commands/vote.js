@@ -108,7 +108,7 @@ async function execute(message, args, user) {
               ? "neutral"
               : "liberal"
             : "fascist";
-          sendDM(
+          await sendDM(
             message,
             current_game,
             `You have drawn **${current_game.gameState.presidentHand.join(

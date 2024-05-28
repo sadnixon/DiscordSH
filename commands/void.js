@@ -24,7 +24,7 @@ async function execute(message, args, user) {
           1;
       }
       if (!current_game.voidVotes.includes(message.author.id)) {
-        if (args && args[0] === "all") {
+        if (args.length && args[0] === "all") {
           const seats_num = current_game.players.filter(
             (e) => e.id === message.author.id
           ).length;

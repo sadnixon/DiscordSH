@@ -16,7 +16,7 @@ async function execute(message, args, user) {
       termlocked.push(current_game.gameState.lastPresidentId);
     }
     if (
-      args &&
+      args.length &&
       _.range(0, current_game.players.length).includes(parseInt(args[0])-1) &&
       !termlocked.includes(parseInt(args[0])-1) &&
       !current_game.gameState.deadPlayers.includes(parseInt(args[0])-1) &&

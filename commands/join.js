@@ -18,10 +18,10 @@ async function execute(message, args, user) {
       !(
         current_game.players
           .map((player) => player.id)
-          .includes(message.author.id) && !(args && args[0] === "test")
+          .includes(message.author.id) && !(args.length && args[0] === "test")
       )
     ) {
-      if (args && args[0] === "test") {
+      if (args.length && args[0] === "test") {
         const seats_num =
           current_game.playerCount - current_game.players.length;
         for (let i = 0; i < seats_num; i++) {

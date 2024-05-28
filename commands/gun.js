@@ -15,7 +15,7 @@ async function execute(message, args, user) {
       (player) => player.role === "hitler"
     );
     if (
-      args &&
+      args.length &&
       _.range(0, current_game.players.length).includes(parseInt(args[0]) - 1) &&
       current_game.gameState.presidentId !== parseInt(args[0]) - 1 &&
       !current_game.gameState.deadPlayers.includes(parseInt(args[0]) - 1) &&
@@ -47,7 +47,7 @@ async function execute(message, args, user) {
       gameStateMessage(message, current_game);
       checkGameEnd(message, current_game);
     } else if (
-      args &&
+      args.length &&
       _.range(0, current_game.players.length).includes(parseInt(args[0]) - 1) &&
       !["hitler", "monarchist", "morgana", "fascist"].includes(
         current_game.players[parseInt(args[0]) - 1].role

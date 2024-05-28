@@ -11,7 +11,7 @@ const colorMap = {
   fascist: "#763A35",
   liberal: "334765",
   neutral: "#EAE6B1",
-}
+};
 
 const standardEmbed = (header, message, team = "neutral") => {
   return {
@@ -30,8 +30,18 @@ const policyMap = {
 };
 
 const roleLists = {
-  liberal: ["liberal","percival","merlin"],
-  fascist: ["fascist","morgana","hitler","monarchist"]
+  liberal: ["liberal", "percival", "merlin"],
+  fascist: ["fascist", "morgana", "hitler", "monarchist"],
+};
+
+async function sendToChannel(message, game, content) {
+  if (message.channel.type === ChannelType.DM) {
+    const guild = await message.client.guilds.fetch(game.guild_id);
+    const channel = await guild.channels.fetch(game.channel_id);
+    await channel.send(content);
+  } else {
+    await message.channel.send(content);
+  }
 }
 
 async function gameStateMessage(message, game) {
@@ -104,13 +114,7 @@ async function gameStateMessage(message, game) {
     )
     .setFooter({ text: `Waiting on: ${game.gameState.phase.slice(0, -4)}` })
     .setColor(colorMap["neutral"]);
-  if (message.channel.type === ChannelType.DM) {
-    const guild = await message.client.guilds.fetch(game.guild_id);
-    const channel = await guild.channels.fetch(game.channel_id);
-    await channel.send({ embeds: [embed] });
-  } else {
-    await message.channel.send({ embeds: [embed] });
-  }
+  await sendToChannel(message, game, { embeds: [embed] });
 }
 
 async function sendDM(message, game, dmHeader, dmText, id, color = "neutral") {
@@ -370,4 +374,5 @@ module.exports = {
   policyMap,
   roleLists,
   roleListConstructor,
+  sendToChannel,
 };

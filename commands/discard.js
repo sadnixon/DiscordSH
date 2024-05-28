@@ -12,7 +12,7 @@ async function execute(message, args, user) {
   if (message.author.id in player_games) {
     const current_game = await game_info.get(player_games[message.author.id]);
     if (
-      args &&
+      args.length &&
       current_game.gameState.phase === "presWait" &&
       current_game.gameState.presidentHand.includes(args[0]) &&
       current_game.players[current_game.gameState.presidentId].id ===

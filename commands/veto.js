@@ -15,7 +15,7 @@ async function execute(message, args, user) {
   if (message.author.id in player_games) {
     const current_game = await game_info.get(player_games[message.author.id]);
     if (
-      args &&
+      args.length &&
       ["ja", "nein"].includes(args[0].toLowerCase()) &&
       current_game.gameState.phase === "vetoWait" &&
       [

@@ -82,24 +82,29 @@ async function gameStateMessage(message, game) {
   );
 
   const emojis = {
-    null: "⬛",
-    investigate: "🔎",
-    election: "🗳️",
-    peek: "👀",
-    bullet: "🔫",
+    lib: "<:LiberalSquare:1245135991597957142>",
+    lib_v: "<:LiberalVictory:1245136002746683502>",
+    lib_p: "<:LiberalPolicy:1245138020617945108>",
+    null: "<:FascistSquare:1245135990557900961>",
+    investigate: "<:Investigation:1245136012125011969>",
+    election: "<:SpecialElection:1245136079787528272>",
+    peek: "<:Peek:1245136009423880254>",
+    bullet: "<:Execution:1245136128508432434>",
+    fas_p: "<:FascistPolicy:1245138019476832329>",
+    fas_v: "<:FascistVictory:1245136005724508220>",
   };
-  const lib_emoji_list = ["⬛", "⬛", "⬛", "⬛", "🕊️"];
+  const lib_emoji_list = ["lib", "lib", "lib", "lib", "lib_v"].map((e) => emojis[e]);
   let emoji_list = game.customGameSettings.powers.map((e) => emojis[e]);
-  emoji_list.push("💀");
+  emoji_list.push(emojis.fas_v);
 
   const embed = new EmbedBuilder()
     .setTitle("Gamestate Update")
     .setDescription(
-      `${"🟦".repeat(game.gameState.lib)}${lib_emoji_list
+      `${emoji_list.lib_p.repeat(game.gameState.lib)}${lib_emoji_list
         .slice(game.gameState.lib)
         .join("")}\n${"⭕".repeat(game.gameState.failedGovs)}${"⚫".repeat(
         3 - game.gameState.failedGovs
-      )}\n${"🟥".repeat(game.gameState.fas)}${emoji_list
+      )}\n${emoji_list.fas_p.repeat(game.gameState.fas)}${emoji_list
         .slice(game.gameState.fas)
         .join("")}\n\n${game.players
         .map(

@@ -6,7 +6,7 @@ async function execute(message, args, user) {
     {
       name: `${PREFIX}creategame [number of players] [variants]`,
       value:
-        "This creates the lobby. You must choose what kind of game it is, i.e. !creategame 7 avalon.",
+        `This creates the lobby. You must choose what kind of game it is, i.e. \`${PREFIX}creategame 7 avalon\`.`,
     },
     {
       name: `${PREFIX}join`,

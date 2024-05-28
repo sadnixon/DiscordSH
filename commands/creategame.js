@@ -80,6 +80,7 @@ async function execute(message, args, user) {
       logs: [],
       playerCount: playerCount,
       player_ids: {},
+      voidVotes: [],
       game_id: game_id,
       guild_id: message.guild.id,
       channel_id: message.channel.id,

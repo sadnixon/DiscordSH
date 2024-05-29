@@ -215,6 +215,19 @@ async function checkGameEnd(message, game) {
     ? "fascist"
     : "liberal";
 
+  const badgeSelector = (role) => {
+    const liberal_roles = ["liberal", "percival", "merlin"];
+    const fascist_roles = ["fascist", "morgana", "monarchist", "hitler"];
+
+    if (liberal_roles.includes(role)) {
+      return "<:LiberalBadge:1245162490900254770>";
+    } else if (fascist_roles.includes(role)) {
+      return "<:FascistBadge:1245162492213067848>";
+    } else {
+      return "<:CommunistBadge:1245162608701476946>";
+    }
+  };
+
   const deads = _.range(0, game.players.length).map((i) =>
     game.gameState.deadPlayers.includes(i) ? "~~" : ""
   );
@@ -235,7 +248,7 @@ async function checkGameEnd(message, game) {
           (player) =>
             `${deads[player.seat]}${player.seat + 1}\\. <@${player.id}>:${
               deads[player.seat]
-            } ${player.role}`
+            } ${badgeSelector(player.role)} **${player.role}**`
         )
         .join("\n")}`
     )
@@ -258,7 +271,7 @@ async function checkGameEnd(message, game) {
     delete player_games[game.players[i].id];
   }
   game.gameState.phase = "done";
-  console.log(game.logs);
+  //console.log(game.logs);
   const channels = await game_info.get("game_channels");
   delete channels[game.channel_id];
   await game_info.set("game_channels", channels);

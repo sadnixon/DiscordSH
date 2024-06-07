@@ -5,6 +5,7 @@ const {
   advancePres,
   checkGameEnd,
   policyMap,
+  handColor,
   reshuffleCheck,
   standardEmbed,
   sendToChannel,
@@ -103,11 +104,7 @@ async function execute(message, args, user) {
           }
           current_game.gameState.log.presidentHand =
             current_game.gameState.presidentHand.map((e) => policyMap[e]);
-          const color = current_game.gameState.presidentHand.includes("B")
-            ? current_game.gameState.presidentHand.includes("R")
-              ? "neutral"
-              : "liberal"
-            : "fascist";
+          const color = handColor(current_game.gameState.presidentHand);
           await sendDM(
             message,
             current_game,

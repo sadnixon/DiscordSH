@@ -8,9 +8,10 @@ const errorMessage = (message) => {
 };
 
 const colorMap = {
-  fascist: "#763A35",
-  liberal: "334765",
+  fascist: "#D66C4D",
+  liberal: "#64A6B8",
   neutral: "#EAE6B1",
+  communist: "#B1342D",
 };
 
 const standardEmbed = (header, message, team = "neutral") => {
@@ -33,6 +34,17 @@ const policyMap = {
 const roleLists = {
   liberal: ["liberal", "percival", "merlin"],
   fascist: ["fascist", "morgana", "hitler", "monarchist"],
+};
+
+const handColor = (hand) => {
+  const has_fas = hand.includes("R");
+  const has_lib = hand.includes("B");
+  const has_comm = hand.includes("C");
+
+  if (has_fas && !has_lib && !has_comm) return "fascist";
+  if (!has_fas && has_lib && !has_comm) return "liberal";
+  if (!has_fas && !has_lib && has_comm) return "communist";
+  return "neutral";
 };
 
 async function sendToChannel(message, game, content) {
@@ -93,18 +105,27 @@ async function gameStateMessage(message, game) {
     bullet: "<:Execution:1245136128508432434>",
     fas_p: "<:FascistPolicy:1245138019476832329>",
     fas_v: "<:FascistVictory:1245136005724508220>",
+    bugging: "<:Bugging:1245136000947064893>",
+    radicalization: "<:Radicalize:1245135999374196837>",
+    fiveYearPlan: "<:5YearPlan:1245135998778871858>",
+    congress: "<:Congress:1245135997130379326>",
+    confession: "<:Confession:1245136804110405774>",
+    comm_p: "<:CommunistPolicy:1245138017488994334>",
+    comm_v: "<:CommunistVictory:1245135993443713094> ",
     tracker: "<:Tracker:1245147770189385728>",
     failed: "<:FailedElection:1245147769140936725>",
-    bugging: "🐞",
-    radicalization: "✊",
-    fiveYearPlan: "🖐️",
-    congress: "🏢",
-    confession: "📓",
   };
   const lib_emoji_list = ["lib", "lib", "lib", "lib", "lib_v"].map(
     (e) => emojis[e]
   );
-  const communist_emoji_list = ["🐞", "✊", "🖐️", "🏢", "📓", "🔨"];
+  const comm_emoji_list = [
+    "bugging",
+    "radicalization",
+    "fiveYearPlan",
+    "congress",
+    "confession",
+    "comm_v",
+  ].map((e) => emojis[e]);
   let emoji_list = game.customGameSettings.powers.map((e) => emojis[e]);
   emoji_list.push(emojis.fas_v);
 
@@ -115,46 +136,39 @@ async function gameStateMessage(message, game) {
     tracker_emoji_list[game.gameState.failedGovs - 1] = emojis.failed;
   }
 
-  let embedDescription = `${emojis.lib_p.repeat(game.gameState.lib)}${lib_emoji_list
-        .slice(game.gameState.lib)
-        .join("")}\n${tracker_emoji_list.join("")}\n${emojis.fas_p.repeat(
-        game.gameState.fas
-      )}${emoji_list.slice(game.gameState.fas).join("")}\n\n${game.players
-        .map(
-          (player) =>
-            `${deads[player.seat]}${votes[player.seat]} ${
-              player.seat + 1
-            }\\. <@${player.id}> ${pres[player.seat]}${chanc[player.seat]}${
-              TL[player.seat]
-            }${deads[player.seat]}${roles[player.seat]}`
-        )
-        .join("\n")}`
+  let embedDescription = `${emojis.lib_p.repeat(
+    game.gameState.lib
+  )}${lib_emoji_list
+    .slice(game.gameState.lib)
+    .join("")}\n${tracker_emoji_list.join("")}\n${emojis.fas_p.repeat(
+    game.gameState.fas
+  )}${emoji_list.slice(game.gameState.fas).join("")}`;
 
   if (game.customGameSettings.communist) {
-    embedDescription += `\n${"🟥".repeat(game.gameState.comm)}${communist_emoji_list
-      .slice(game.gameState.comm)
-      .join("")}`;
+    embedDescription += `\n${emojis.comm_p.repeat(
+      game.gameState.comm
+    )}${comm_emoji_list.slice(game.gameState.comm).join("")}`;
   }
 
   embedDescription += `\n\n${game.players
     .map(
       (player) =>
-        `${deads[player.seat]}${votes[player.seat]} ${
-          player.seat + 1
-        }\\. <@${player.id}> ${pres[player.seat]}${chanc[player.seat]}${
-          TL[player.seat]
-        }${deads[player.seat]}${roles[player.seat]}`
+        `${deads[player.seat]}${votes[player.seat]} ${player.seat + 1}\\. <@${
+          player.id
+        }> ${pres[player.seat]}${chanc[player.seat]}${TL[player.seat]}${
+          deads[player.seat]
+        }${roles[player.seat]}`
     )
     .join("\n")}`;
 
   const embed = new EmbedBuilder()
     .setTitle("Gamestate Update")
     .setDescription(embedDescription)
-    .setFooter({ text: `Waiting on: ${game.gameState.phase.slice(0, -4)}` });
+    .setFooter({ text: `Waiting on: ${game.gameState.phase.slice(0, -4)}` })
     .setColor(colorMap["neutral"]);
 
   await sendToChannel(message, game, { embeds: [embed] });
-};
+}
 
 async function sendDM(message, game, dmHeader, dmText, id, color = "neutral") {
   let player_disc;
@@ -429,6 +443,7 @@ module.exports = {
   reshuffleCheck,
   policyMap,
   roleLists,
+  handColor,
   roleListConstructor,
   sendToChannel,
 };

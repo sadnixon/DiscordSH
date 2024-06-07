@@ -4,6 +4,7 @@ const {
   sendDM,
   gameStateMessage,
   policyMap,
+  handColor,
   sendToChannel,
   standardEmbed,
 } = require("../message-helpers");
@@ -35,11 +36,7 @@ async function execute(message, args, user) {
         ""
       )}**.`;
       let dmText;
-      const color = current_game.gameState.chancellorHand.includes("B")
-        ? current_game.gameState.chancellorHand.includes("R")
-          ? "neutral"
-          : "liberal"
-        : "fascist";
+      const color = handColor(current_game.gameState.chancellorHand);
       if (
         current_game.gameState.fas >= current_game.customGameSettings.vetoZone
       ) {

@@ -11,6 +11,7 @@ async function execute(message, args, user) {
     let monarchist = false;
     let avalon = false;
     let percy = false;
+    let communist = false;
 
     // Check for arguments and gamemodes (case-insensitive)
     if (args.length) {
@@ -20,9 +21,8 @@ async function execute(message, args, user) {
         avalon = true;
         if (args.map((e) => e.toLowerCase()).includes("percival")) percy = true;
       }
-      playerCount = parseInt(
-        args.find((num) => parseInt(num) >= 5 && parseInt(num) <= 10)
-      );
+      if (args.map((e) => e.toLowerCase()).includes("communist")) communist = true;
+      playerCount = parseInt(args.find((num) => parseInt(num) >= 5 && parseInt(num) <= 10));
     } else {
       // If no player count is specified, prompt the user to provide it
       message.channel.send(
@@ -48,6 +48,7 @@ async function execute(message, args, user) {
     } else if (playerCount === 7 || playerCount === 8) {
       powers = [null, "investigate", "election", "bullet", "bullet"];
     }
+    const communistPowers = ["bugging", "radicalization", "fiveYearPlan", "congress", "confession"];
 
     const game_id = message.channel.id.toString() + "_" + Date.now().toString();
     channels[message.channel.id] = game_id;
@@ -56,6 +57,7 @@ async function execute(message, args, user) {
         deckState: { lib: 6, fas: 11 },
         trackState: { lib: 0, fas: 0 },
         powers: powers,
+        communistPowers: communistPowers,
         enabled: false,
         hitlerZone: 3,
         vetoZone: 5,
@@ -63,6 +65,7 @@ async function execute(message, args, user) {
         hitKnowsFas: playerCount < 7,
         monarchist: monarchist,
         avalon: avalon,
+        communist: communist,
       },
       date: new Date(),
       gameSetting: {
@@ -87,6 +90,7 @@ async function execute(message, args, user) {
       gameState: {
         lib: 0,
         fas: 0,
+        comm: 0, // Adding communist track state
         failedGovs: 0,
         specialElected: -1,
         deck: shuffleArray([
@@ -107,6 +111,7 @@ async function execute(message, args, user) {
           "B",
           "B",
           "B",
+          ...communist ? ["C", "C", "C", "C", "C", "C", "C", "C"] : []  // Add 8 "C" cards if communist mode is enabled
         ]),
         discard: [],
         presidentId: -1,
@@ -143,6 +148,8 @@ async function execute(message, args, user) {
       gameModeMessage = "Monarchist mode enabled.";
     } else if (avalon) {
       gameModeMessage = `Avalon${percyMessage} mode enabled.`;
+    } else if (communist) {
+      gameModeMessage = "Communist mode enabled.";
     } else {
       gameModeMessage = "Vanilla Secret Hitler mode enabled.";
     }

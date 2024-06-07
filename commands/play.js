@@ -45,6 +45,7 @@ async function execute(message, args, user) {
         )
       );
       if (args[0] === "B") {
+        // Liberal policy enacted
         current_game.gameState.phase = "nomWait";
         current_game.gameState.lastPresidentId =
           current_game.gameState.presidentId;
@@ -57,12 +58,36 @@ async function execute(message, args, user) {
         current_game.logs.push(current_game.gameState.log);
         current_game.gameState.log = {};
         current_game.gameState.lib++;
-        if (
-          current_game.customGameSettings.avalon &&
-          current_game.gameState.lib === 5
-        )
+        if (current_game.customGameSettings.avalon && current_game.gameState.lib === 5) {
           current_game.gameState.phase = "assassinWait";
+        }
+      } else if (args[0] === "C") {
+        // Communist policy enacted
+        current_game.gameState.comm++;
+        const power_slot =
+          current_game.customGameSettings.communistPowers[
+            current_game.gameState.comm - 1
+          ];
+        
+        if (power_slot === null) {
+          current_game.gameState.phase = "nomWait";
+          current_game.gameState.lastPresidentId =
+            current_game.gameState.presidentId;
+          current_game.gameState.lastChancellorId =
+            current_game.gameState.chancellorId;
+          advancePres(current_game);
+          const deckState = current_game.gameState.deck.map(
+            (e) => policyMap[e]
+          );
+          deckState.reverse();
+          current_game.gameState.log.deckState = deckState;
+          current_game.logs.push(current_game.gameState.log);
+          current_game.gameState.log = {};
+        } else {
+          handleCommunistPower(current_game, power_slot, message);
+        }
       } else {
+        // Fascist policy enacted
         current_game.gameState.fas++;
         const power_slot =
           current_game.customGameSettings.powers[
@@ -144,6 +169,30 @@ async function execute(message, args, user) {
     }
   } else {
     message.channel.send(errorMessage("Player not in game!"));
+  }
+}
+
+function handleCommunistPower(current_game, power_slot, message) {
+  if (power_slot === "bugging") {
+    current_game.gameState.phase = "bugWait";
+    current_game.gameState.log.buggingPresidentId =
+      current_game.gameState.presidentId;
+  } else if (power_slot === "radicalization") {
+    current_game.gameState.phase = "radicalizeWait";
+    current_game.gameState.log.radicalizePresidentId =
+      current_game.gameState.presidentId;
+  } else if (power_slot === "fiveYearPlan") {
+    current_game.gameState.phase = "fiveYearWait";
+    current_game.gameState.log.fiveYearPresidentId =
+      current_game.gameState.presidentId;
+  } else if (power_slot === "congress") {
+    current_game.gameState.phase = "congressWait";
+    current_game.gameState.log.congressPresidentId =
+      current_game.gameState.presidentId;
+  } else if (power_slot === "confession") {
+    current_game.gameState.phase = "confessWait";
+    current_game.gameState.log.confessPresidentId =
+      current_game.gameState.presidentId;
   }
 }
 

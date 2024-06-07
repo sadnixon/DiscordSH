@@ -1,13 +1,18 @@
 const fs = require("fs");
-const { Collection, Client, GatewayIntentBits } = require('discord.js');
+const { Collection, Client, GatewayIntentBits, Partials } = require('discord.js');
 const Keyv = require("keyv");
 const client = new Client({
 	intents: [
 		GatewayIntentBits.Guilds,
 		GatewayIntentBits.GuildMessages,
 		GatewayIntentBits.MessageContent,
+    GatewayIntentBits.DirectMessages,
 		GatewayIntentBits.GuildMembers,
 	],
+  partials: [
+    Partials.Channel,
+    Partials.Message
+  ],
 });
 const { format, utcToZonedTime } = require("date-fns-tz");
 const {

@@ -1,4 +1,8 @@
-const { errorMessage, shuffleArray } = require("../message-helpers");
+const {
+  errorMessage,
+  standardEmbed,
+  shuffleArray,
+} = require("../message-helpers");
 
 async function execute(message, args, user) {
   const channels = await game_info.get("game_channels");
@@ -10,22 +14,29 @@ async function execute(message, args, user) {
     let communist = false;
 
     // Check for arguments and gamemodes (case-insensitive)
-    if (args && args.length > 0) {
-      if (args.map((e) => e.toLowerCase()).includes("monarchist")) monarchist = true;
+    if (args.length) {
+      if (args.map((e) => e.toLowerCase()).includes("monarchist"))
+        monarchist = true;
       if (args.map((e) => e.toLowerCase()).includes("avalon")) {
         avalon = true;
         if (args.map((e) => e.toLowerCase()).includes("percival")) percy = true;
       }
       if (args.map((e) => e.toLowerCase()).includes("communist")) communist = true;
-      playerCount = parseInt(args.find(num => parseInt(num) >= 5 && parseInt(num) <= 10));
+      playerCount = parseInt(args.find((num) => parseInt(num) >= 5 && parseInt(num) <= 10));
     } else {
       // If no player count is specified, prompt the user to provide it
-      message.channel.send(errorMessage("Please specify the number of players (between 5 and 10)."));
+      message.channel.send(
+        errorMessage("Please specify the number of players (between 5 and 10).")
+      );
       return;
     }
 
     if (isNaN(playerCount) || playerCount < 5 || playerCount > 10) {
-      message.channel.send(errorMessage("Invalid player count. Please specify a number between 5 and 10."));
+      message.channel.send(
+        errorMessage(
+          "Invalid player count. Please specify a number between 5 and 10."
+        )
+      );
       return;
     }
 
@@ -68,10 +79,11 @@ async function execute(message, args, user) {
         avalonSH: avalon ? { withPercival: percy } : null,
         noTopdecking: 0,
       },
-      players: [],
+      players: [{ id: message.author.id }],
       logs: [],
       playerCount: playerCount,
       player_ids: {},
+      voidVotes: [],
       game_id: game_id,
       guild_id: message.guild.id,
       channel_id: message.channel.id,
@@ -82,10 +94,22 @@ async function execute(message, args, user) {
         failedGovs: 0,
         specialElected: -1,
         deck: shuffleArray([
-          "R", "R", "R", "R",
-          "R", "R", "R", "R",
-          "R", "R", "R", "B",
-          "B", "B", "B", "B",
+          "R",
+          "R",
+          "R",
+          "R",
+          "R",
+          "R",
+          "R",
+          "R",
+          "R",
+          "R",
+          "R",
+          "B",
+          "B",
+          "B",
+          "B",
+          "B",
           "B",
           ...communist ? ["C", "C", "C", "C", "C", "C", "C", "C"] : []  // Add 8 "C" cards if communist mode is enabled
         ]),
@@ -109,26 +133,40 @@ async function execute(message, args, user) {
         log: {},
       },
     };
+
+    const player_games = await game_info.get("player_games");
+    player_games[message.author.id] = channels[message.channel.id];
+    await game_info.set("player_games", player_games);
     await game_info.set("game_channels", channels);
     await game_info.set(game_id, game_data);
 
     let gameModeMessage;
     const percyMessage = percy ? " with Percival" : "";
     if (monarchist && avalon) {
-      gameModeMessage = ` Monarchist and Avalon${percyMessage} modes enabled.`;
+      gameModeMessage = `Monarchist and Avalon${percyMessage} modes enabled.`;
     } else if (monarchist) {
-      gameModeMessage = " Monarchist mode enabled.";
+      gameModeMessage = "Monarchist mode enabled.";
     } else if (avalon) {
-      gameModeMessage = ` Avalon${percyMessage} mode enabled.`;
+      gameModeMessage = `Avalon${percyMessage} mode enabled.`;
     } else if (communist) {
-      gameModeMessage = " Communist mode enabled.";
+      gameModeMessage = "Communist mode enabled.";
     } else {
-      gameModeMessage = " Vanilla Secret Hitler mode enabled.";
+      gameModeMessage = "Vanilla Secret Hitler mode enabled.";
     }
 
-    message.channel.send(`Game created for ${playerCount} players!${gameModeMessage}`);
+    await message.channel.send(
+      standardEmbed(`Game created for ${playerCount} players!`, gameModeMessage)
+    );
+    await message.channel.send(
+      standardEmbed(
+        `Seats filled: 1/${playerCount}`,
+        `<@${message.author.id}> has joined the game!`
+      )
+    );
   } else {
-    message.channel.send(errorMessage("A game already exists in this channel!"));
+    await message.channel.send(
+      errorMessage("A game already exists in this channel!")
+    );
   }
 }
 

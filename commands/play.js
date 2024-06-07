@@ -7,6 +7,8 @@ const {
   checkGameEnd,
   policyMap,
   reshuffleCheck,
+  sendToChannel,
+  standardEmbed,
 } = require("../message-helpers");
 const _ = require("lodash");
 
@@ -15,7 +17,7 @@ async function execute(message, args, user) {
   if (message.author.id in player_games) {
     const current_game = await game_info.get(player_games[message.author.id]);
     if (
-      args &&
+      args.length &&
       current_game.gameState.phase === "chancWait" &&
       current_game.gameState.chancellorHand.includes(args[0]) &&
       current_game.players[current_game.gameState.chancellorId].id ===
@@ -31,7 +33,17 @@ async function execute(message, args, user) {
         current_game.gameState.chancellorHand.pop()
       );
       current_game.gameState.log.enactedPolicy = policyMap[args[0]];
-
+      await sendToChannel(
+        message,
+        current_game,
+        standardEmbed(
+          `Policy Played!`,
+          `${current_game.gameState.chancellorId + 1}. <@${
+            message.author.id
+          }> played a **${policyMap[args[0]]}** policy.`,
+          policyMap[args[0]]
+        )
+      );
       if (args[0] === "B") {
         // Liberal policy enacted
         current_game.gameState.phase = "nomWait";
@@ -109,13 +121,25 @@ async function execute(message, args, user) {
           current_game.gameState.log.policyPeek = peek_draw.map(
             (e) => policyMap[e]
           );
-          sendDM(
+          await sendDM(
             message,
             current_game,
+            "Deck Peek Results:",
             `You have peeked at **${peek_draw.join(
               ""
             )}** in that order (top on the left).`,
             current_game.players[current_game.gameState.presidentId].id
+          );
+          await sendToChannel(
+            message,
+            current_game,
+            standardEmbed(
+              `Deck Peeked!`,
+              `${current_game.gameState.presidentId + 1}. <@${
+                current_game.players[current_game.gameState.presidentId].id
+              }> has peeked at the top 3 cards of the deck`,
+              "fascist"
+            )
           );
           current_game.gameState.phase = "nomWait";
           current_game.gameState.lastPresidentId =
@@ -137,8 +161,8 @@ async function execute(message, args, user) {
         }
       }
       reshuffleCheck(current_game);
-      gameStateMessage(message, current_game);
       await game_info.set(current_game.game_id, current_game);
+      gameStateMessage(message, current_game);
       checkGameEnd(message, current_game);
     } else {
       message.channel.send(errorMessage("Invalid play pick!"));

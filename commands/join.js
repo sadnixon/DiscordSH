@@ -4,6 +4,8 @@ const {
   sendDM,
   gameStateMessage,
   roleListConstructor,
+  standardEmbed,
+  roleLists,
 } = require("../message-helpers");
 
 async function execute(message, args, user) {
@@ -13,12 +15,16 @@ async function execute(message, args, user) {
 
     if (
       current_game.gameState.phase === "joinWait" &&
-      !current_game.players
-        .map((player) => player.id)
-        .includes(message.author.id)
+      !(
+        current_game.players
+          .map((player) => player.id)
+          .includes(message.author.id) && !(args.length && args[0] === "test")
+      )
     ) {
-      if (args && args[0] === "test") {
-        for (let i = 0; i < current_game.playerCount; i++) {
+      if (args.length && args[0] === "test") {
+        const seats_num =
+          current_game.playerCount - current_game.players.length;
+        for (let i = 0; i < seats_num; i++) {
           current_game.players.push({ id: message.author.id });
         }
       } else {
@@ -27,12 +33,20 @@ async function execute(message, args, user) {
 
       const player_games = await game_info.get("player_games");
       player_games[message.author.id] = channels[message.channel.id];
-      game_info.set("player_games", player_games);
+      await game_info.set("player_games", player_games);
 
       if (current_game.players.length === current_game.playerCount) {
         current_game.gameState.phase = "nomWait";
         current_game.gameState.presidentId = 0;
         await game_info.set(current_game.game_id, current_game);
+
+        await message.channel.send(
+          standardEmbed(
+            `Game full... Starting momentarily...`,
+            `<@${message.author.id}> has joined the game!`
+          )
+        );
+
         current_game.players = shuffleArray(current_game.players);
 
         const roles = roleListConstructor(current_game);
@@ -44,14 +58,23 @@ async function execute(message, args, user) {
           await sendDM(
             message,
             current_game,
+            "Role Assignment:",
             `Your seat is **${i + 1}** and your role is **${roles[i]}**`,
-            current_game.players[i].id
+            current_game.players[i].id,
+            roleLists.liberal.includes(roles[i]) ? "liberal" : "fascist"
           );
         }
 
         await notifyRoles(message, current_game, roles);
 
         gameStateMessage(message, current_game);
+      } else {
+        await message.channel.send(
+          standardEmbed(
+            `Seats filled: ${current_game.players.length}/${current_game.playerCount}`,
+            `<@${message.author.id}> has joined the game!`
+          )
+        );
       }
       await game_info.set(current_game.game_id, current_game);
     } else {
@@ -78,19 +101,23 @@ async function notifyRoles(message, current_game, roles) {
           await sendDM(
             message,
             current_game,
+            "Role Notification:",
             `The player <@${current_game.players[j].id}> in seat **${
               current_game.players[j].seat + 1
             }** is **${roles[j]}**.`,
-            current_game.players[i].id
+            current_game.players[i].id,
+            "fascist"
           );
         } else if (i !== j && roles[j] === "monarchist") {
           await sendDM(
             message,
             current_game,
+            "Role Notification:",
             `The player <@${current_game.players[j].id}> in seat **${
               current_game.players[j].seat + 1
             }** is **fascist**.`,
-            current_game.players[i].id
+            current_game.players[i].id,
+            "fascist"
           );
         }
       }
@@ -100,10 +127,12 @@ async function notifyRoles(message, current_game, roles) {
           await sendDM(
             message,
             current_game,
+            "Role Notification:",
             `The player <@${current_game.players[j].id}> in seat **${
               current_game.players[j].seat + 1
             }** is **fascist**.`,
-            current_game.players[i].id
+            current_game.players[i].id,
+            "fascist"
           );
         }
       }
@@ -113,10 +142,12 @@ async function notifyRoles(message, current_game, roles) {
           await sendDM(
             message,
             current_game,
+            "Role Notification:",
             `The player <@${current_game.players[j].id}> in seat **${
               current_game.players[j].seat + 1
             }** is **fascist**.`,
-            current_game.players[i].id
+            current_game.players[i].id,
+            "fascist"
           );
         }
       }
@@ -130,10 +161,12 @@ async function notifyRoles(message, current_game, roles) {
           await sendDM(
             message,
             current_game,
+            "Role Notification:",
             `The player <@${current_game.players[j].id}> in seat **${
               current_game.players[j].seat + 1
             }** could be **merlin**.`,
-            current_game.players[i].id
+            current_game.players[i].id,
+            "liberal"
           );
         }
       }

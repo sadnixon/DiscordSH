@@ -7,13 +7,45 @@ const errorMessage = (message) => {
   };
 };
 
+const colorMap = {
+  fascist: "#763A35",
+  liberal: "334765",
+  neutral: "#EAE6B1",
+};
+
+const standardEmbed = (header, message, team = "neutral") => {
+  return {
+    embeds: [
+      new EmbedBuilder()
+        .setTitle(header)
+        .setDescription(message)
+        .setColor(colorMap[team]),
+    ],
+  };
+};
+
 const policyMap = {
   B: "liberal",
   R: "fascist",
   C: "communist",
 };
 
-const gameStateMessage = (message, game) => {
+const roleLists = {
+  liberal: ["liberal", "percival", "merlin"],
+  fascist: ["fascist", "morgana", "hitler", "monarchist"],
+};
+
+async function sendToChannel(message, game, content) {
+  if (message.channel.type === ChannelType.DM) {
+    const guild = await message.client.guilds.fetch(game.guild_id);
+    const channel = await guild.channels.fetch(game.channel_id);
+    await channel.send(content);
+  } else {
+    await message.channel.send(content);
+  }
+}
+
+async function gameStateMessage(message, game) {
   const deads = _.range(0, game.players.length).map((i) =>
     game.gameState.deadPlayers.includes(i) ? "~~" : ""
   );
@@ -51,30 +83,52 @@ const gameStateMessage = (message, game) => {
   );
 
   const emojis = {
-    null: "⬛",
-    investigate: "🔎",
-    election: "🗳️",
-    peek: "👀",
-    bullet: "🔫",
+    lib: "<:LiberalSquare:1245135991597957142>",
+    lib_v: "<:LiberalVictory:1245136002746683502>",
+    lib_p: "<:LiberalPolicy:1245138020617945108>",
+    null: "<:FascistSquare:1245135990557900961>",
+    investigate: "<:Investigation:1245136012125011969>",
+    election: "<:SpecialElection:1245136079787528272>",
+    peek: "<:Peek:1245136009423880254>",
+    bullet: "<:Execution:1245136128508432434>",
+    fas_p: "<:FascistPolicy:1245138019476832329>",
+    fas_v: "<:FascistVictory:1245136005724508220>",
+    tracker: "<:Tracker:1245147770189385728>",
+    failed: "<:FailedElection:1245147769140936725>",
     bugging: "🐞",
     radicalization: "✊",
     fiveYearPlan: "🖐️",
     congress: "🏢",
     confession: "📓",
   };
-
-  const lib_emoji_list = ["⬛", "⬛", "⬛", "⬛", "🕊️"];
+  const lib_emoji_list = ["lib", "lib", "lib", "lib", "lib_v"].map(
+    (e) => emojis[e]
+  );
   const communist_emoji_list = ["🐞", "✊", "🖐️", "🏢", "📓", "🔨"];
   let emoji_list = game.customGameSettings.powers.map((e) => emojis[e]);
-  emoji_list.push("💀");
+  emoji_list.push(emojis.fas_v);
 
-  let embedDescription = `${"🟦".repeat(game.gameState.lib)}${lib_emoji_list
-    .slice(game.gameState.lib)
-    .join("")}\n${"⭕".repeat(game.gameState.failedGovs)}${"⚫".repeat(
-    3 - game.gameState.failedGovs
-  )}\n${"🟥".repeat(game.gameState.fas)}${emoji_list
-    .slice(game.gameState.fas)
-    .join("")}`;
+  let tracker_emoji_list = ["tracker", "tracker", "tracker"].map(
+    (e) => emojis[e]
+  );
+  if (game.gameState.failedGovs > 0) {
+    tracker_emoji_list[game.gameState.failedGovs - 1] = emojis.failed;
+  }
+
+  let embedDescription = `${emojis.lib_p.repeat(game.gameState.lib)}${lib_emoji_list
+        .slice(game.gameState.lib)
+        .join("")}\n${tracker_emoji_list.join("")}\n${emojis.fas_p.repeat(
+        game.gameState.fas
+      )}${emoji_list.slice(game.gameState.fas).join("")}\n\n${game.players
+        .map(
+          (player) =>
+            `${deads[player.seat]}${votes[player.seat]} ${
+              player.seat + 1
+            }\\. <@${player.id}> ${pres[player.seat]}${chanc[player.seat]}${
+              TL[player.seat]
+            }${deads[player.seat]}${roles[player.seat]}`
+        )
+        .join("\n")}`
 
   if (game.customGameSettings.communist) {
     embedDescription += `\n${"🟥".repeat(game.gameState.comm)}${communist_emoji_list
@@ -97,33 +151,32 @@ const gameStateMessage = (message, game) => {
     .setTitle("Gamestate Update")
     .setDescription(embedDescription)
     .setFooter({ text: `Waiting on: ${game.gameState.phase.slice(0, -4)}` });
+    .setColor(colorMap["neutral"]);
 
-  if (message.channel.type === ChannelType.DM) {
-    const guild = message.client.guilds.cache.get(game.guild_id);
-    const channel = guild.channels.cache.get(game.channel_id);
-    channel.send({ embeds: [embed] });
-  } else {
-    message.channel.send({ embeds: [embed] });
-  }
+  await sendToChannel(message, game, { embeds: [embed] });
 };
 
-async function sendDM(message, game, dmText, id) {
+async function sendDM(message, game, dmHeader, dmText, id, color = "neutral") {
   let player_disc;
   if (message.channel.type === ChannelType.DM) {
-    const guild = await message.client.guilds.cache
-      .get(game.guild_id)
-      .catch(() => null);
+    const guild = await message.client.guilds.fetch(game.guild_id);
     player_disc = await guild.members.fetch(`${id}`).catch(() => null);
-    if (!player_disc) return message.channel.send("User not found:(");
+    if (!player_disc)
+      return message.channel.send(errorMessage("User not found:("));
   } else {
     player_disc = await message.guild.members.fetch(`${id}`).catch(() => null);
-    if (!player_disc) return message.channel.send("User not found:(");
+    if (!player_disc)
+      return message.channel.send(errorMessage("User not found:("));
   }
-  return await player_disc.send(dmText).catch(() => {
-    message.channel.send(
-      "User has DMs closed or has no mutual servers with the bot:("
-    );
-  });
+  return await player_disc
+    .send(standardEmbed(dmHeader, dmText, color))
+    .catch(() => {
+      message.channel.send(
+        errorMessage(
+          "User has DMs closed or has no mutual servers with the bot:("
+        )
+      );
+    });
 }
 
 async function checkGameEnd(message, game) {
@@ -185,6 +238,24 @@ async function checkGameEnd(message, game) {
     end_method = "The Hammer has been failed! Fascists win!";
     winning_players = ["fascist", "morgana", "monarchist", "hitler"];
   }
+  const winning_team = ["fascist", "morgana", "monarchist", "hitler"].some(
+    (e) => winning_players.includes(e)
+  )
+    ? "fascist"
+    : "liberal";
+
+  const badgeSelector = (role) => {
+    const liberal_roles = ["liberal", "percival", "merlin"];
+    const fascist_roles = ["fascist", "morgana", "monarchist", "hitler"];
+
+    if (liberal_roles.includes(role)) {
+      return "<:LiberalBadge:1245162490900254770>";
+    } else if (fascist_roles.includes(role)) {
+      return "<:FascistBadge:1245162492213067848>";
+    } else {
+      return "<:CommunistBadge:1245162608701476946>";
+    }
+  };
 
   const deads = _.range(0, game.players.length).map((i) =>
     game.gameState.deadPlayers.includes(i) ? "~~" : ""
@@ -192,8 +263,8 @@ async function checkGameEnd(message, game) {
   let guild;
   let channel;
   if (message.channel.type === ChannelType.DM) {
-    guild = await message.client.guilds.cache.get(game.guild_id);
-    channel = await guild.channels.cache.get(game.channel_id);
+    guild = await message.client.guilds.fetch(game.guild_id);
+    channel = await guild.channels.fetch(game.channel_id);
   } else {
     guild = await message.guild;
     channel = await message.channel;
@@ -206,27 +277,30 @@ async function checkGameEnd(message, game) {
           (player) =>
             `${deads[player.seat]}${player.seat + 1}\\. <@${player.id}>:${
               deads[player.seat]
-            } ${player.role}`
+            } ${badgeSelector(player.role)} **${player.role}**`
         )
         .join("\n")}`
     )
-    .setFooter({ text: "GG everybody!" });
+    .setFooter({ text: "GG everybody!" })
+    .setColor(colorMap[winning_team]);
   channel.send({ embeds: [embed] });
   const player_games = await game_info.get("player_games");
   for (let i = 0; i < game.players.length; i++) {
     let result = winning_players.includes(game.players[i].role)
       ? "won!"
       : "lost.";
-    sendDM(
+    await sendDM(
       message,
       game,
-      `**${end_method}** Since your role is **${game.players[i].role}**, you ${result}`,
-      game.players[i].id
+      `**${end_method}**`,
+      `Since your role is **${game.players[i].role}**, you ${result}`,
+      game.players[i].id,
+      winning_team
     );
     delete player_games[game.players[i].id];
   }
   game.gameState.phase = "done";
-  console.log(game.logs);
+  //console.log(game.logs);
   const channels = await game_info.get("game_channels");
   delete channels[game.channel_id];
   await game_info.set("game_channels", channels);
@@ -346,6 +420,7 @@ const reshuffleCheck = (game) => {
 
 module.exports = {
   errorMessage,
+  standardEmbed,
   shuffleArray,
   sendDM,
   gameStateMessage,
@@ -353,5 +428,7 @@ module.exports = {
   checkGameEnd,
   reshuffleCheck,
   policyMap,
+  roleLists,
   roleListConstructor,
+  sendToChannel,
 };

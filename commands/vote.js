@@ -1,12 +1,13 @@
 const {
   errorMessage,
-  shuffleArray,
   sendDM,
   gameStateMessage,
   advancePres,
   checkGameEnd,
   policyMap,
   reshuffleCheck,
+  standardEmbed,
+  sendToChannel,
 } = require("../message-helpers");
 const _ = require("lodash");
 
@@ -15,7 +16,7 @@ async function execute(message, args, user) {
   if (message.author.id in player_games) {
     const current_game = await game_info.get(player_games[message.author.id]);
     if (
-      args &&
+      args.length &&
       ["ja", "nein"].includes(args[0].toLowerCase()) &&
       current_game.gameState.phase === "voteWait"
     ) {
@@ -62,6 +63,14 @@ async function execute(message, args, user) {
         vote_list.filter((e) => e !== null).length ===
         current_game.players.length - current_game.gameState.deadPlayers.length
       ) {
+        await sendToChannel(
+          message,
+          current_game,
+          standardEmbed(
+            `All players have voted!`,
+            `${vote_index + 1}. <@${message.author.id}> has voted.`
+          )
+        );
         current_game.gameState.log.votes = vote_list;
         current_game.gameState.log.presidentId =
           current_game.gameState.presidentId;
@@ -94,13 +103,20 @@ async function execute(message, args, user) {
           }
           current_game.gameState.log.presidentHand =
             current_game.gameState.presidentHand.map((e) => policyMap[e]);
-          sendDM(
+          const color = current_game.gameState.presidentHand.includes("B")
+            ? current_game.gameState.presidentHand.includes("R")
+              ? "neutral"
+              : "liberal"
+            : "fascist";
+          await sendDM(
             message,
             current_game,
             `You have drawn **${current_game.gameState.presidentHand.join(
               ""
-            )}**. Please choose a card to discard.`,
-            current_game.players[current_game.gameState.presidentId].id
+            )}**.`,
+            "Please choose a card to discard.",
+            current_game.players[current_game.gameState.presidentId].id,
+            color
           );
         } else {
           current_game.gameState.phase = "nomWait";
@@ -148,8 +164,40 @@ async function execute(message, args, user) {
           null
         );
         checkGameEnd(message, current_game);
+      } else {
+        await sendToChannel(
+          message,
+          current_game,
+          standardEmbed(
+            `Votes: ${vote_list.filter((e) => e !== null).length}/${
+              current_game.players.length -
+              current_game.gameState.deadPlayers.length
+            }`,
+            `${vote_index + 1}. <@${message.author.id}> has voted.`
+          )
+        );
       }
       await game_info.set(current_game.game_id, current_game);
+    } else if (current_game.gameState.phase === "voteWait") {
+      let vote_index = current_game.player_ids[message.author.id];
+      if (current_game.gameState.deadPlayers.includes(vote_index))
+        return message.channel.send(errorMessage("You are dead!"));
+      current_game.gameState.votes[vote_index] = null;
+      const vote_list = _.range(0, current_game.players.length).map(
+        (i) => current_game.gameState.votes[i]
+      );
+      await game_info.set(current_game.game_id, current_game);
+      await sendToChannel(
+        message,
+        current_game,
+        standardEmbed(
+          `Votes: ${vote_list.filter((e) => e !== null).length}/${
+            current_game.players.length -
+            current_game.gameState.deadPlayers.length
+          }`,
+          `${vote_index + 1}. <@${message.author.id}> has unvoted.`
+        )
+      );
     } else {
       message.channel.send(errorMessage("Invalid vote pick!"));
     }

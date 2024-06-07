@@ -7,6 +7,7 @@ const {
   checkGameEnd,
   policyMap,
   reshuffleCheck,
+  standardEmbed,
 } = require("../message-helpers");
 const _ = require("lodash");
 
@@ -15,7 +16,7 @@ async function execute(message, args, user) {
   if (message.author.id in player_games) {
     const current_game = await game_info.get(player_games[message.author.id]);
     if (
-      args &&
+      args.length &&
       ["ja", "nein"].includes(args[0].toLowerCase()) &&
       current_game.gameState.phase === "vetoWait" &&
       [
@@ -26,15 +27,15 @@ async function execute(message, args, user) {
       let vote_index = current_game.player_ids[message.author.id];
       if (
         args.length > 1 &&
-        current_game.players[parseInt(args[1])].id === message.author.id
+        current_game.players[parseInt(args[1]) - 1].id === message.author.id
       ) {
         if (
           [
             current_game.gameState.presidentId,
             current_game.gameState.chancellorId,
-          ].includes(parseInt(args[1]))
+          ].includes(parseInt(args[1]) - 1)
         ) {
-          vote_index = parseInt(args[1]);
+          vote_index = parseInt(args[1] - 1);
         } else {
           if (
             current_game.players[current_game.gameState.presidentId].id ==
@@ -54,7 +55,6 @@ async function execute(message, args, user) {
       ) {
         return message.channel.send(errorMessage("You can't veto this!"));
       }
-
       if (args[0].toLowerCase() === "ja") {
         vote_index === current_game.gameState.presidentId
           ? (current_game.gameState.presidentVeto = true)
@@ -64,7 +64,9 @@ async function execute(message, args, user) {
           ? (current_game.gameState.presidentVeto = false)
           : (current_game.gameState.chancellorVeto = false);
       }
-
+      await message.channel.send(
+        standardEmbed("Veto Made.", `You have voted ${args[0]} on the veto.`)
+      );
       if (
         current_game.gameState.presidentVeto !== null &&
         current_game.gameState.chancellorVeto !== null
@@ -133,13 +135,20 @@ async function execute(message, args, user) {
           }
         } else {
           current_game.gameState.phase = "chancWait";
-          sendDM(
+          const color = current_game.gameState.chancellorHand.includes("B")
+            ? current_game.gameState.chancellorHand.includes("R")
+              ? "neutral"
+              : "liberal"
+            : "fascist";
+          await sendDM(
             message,
             current_game,
             `You have been passed **${current_game.gameState.chancellorHand.join(
               ""
-            )}**. Please choose a card to play.`,
-            current_game.players[current_game.gameState.chancellorId].id
+            )}**.`,
+            "Please choose a card to play.",
+            current_game.players[current_game.gameState.chancellorId].id,
+            color
           );
         }
         gameStateMessage(message, current_game);

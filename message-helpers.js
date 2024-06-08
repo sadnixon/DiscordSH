@@ -80,13 +80,18 @@ async function gameStateMessage(message, game) {
       game.gameState.lastChancellorId === i ? "(TL)" : ""
     );
   }
-  const votes = _.range(0, game.players.length).map((i) =>
-    game.gameState.votes[i]
-      ? "Ja"
-      : game.gameState.votes[i] === false
-      ? "Nein"
-      : ""
-  );
+const votes = _.range(0, game.players.length).map((i) => {
+  const lobbyMultiplier = game.players[i].usedLobbyCard ? 3 : 1; // Check if the player has used the lobby card
+  const vote = game.gameState.votes[i];
+
+  if (vote === true) {
+    return "Ja".repeat(lobbyMultiplier); // Multiply "Ja" by lobbyMultiplier
+  } else if (vote === false) {
+    return "Nein".repeat(lobbyMultiplier); // Multiply "Nein" by lobbyMultiplier
+  } else {
+    return "";
+  }
+});
   const roles = _.range(0, game.players.length).map((i) =>
     !["liberal", "merlin", "percival"].includes(game.players[i].role) &&
     game.gameState.phase === "assassinWait"

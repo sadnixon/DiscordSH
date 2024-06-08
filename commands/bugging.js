@@ -19,18 +19,18 @@ async function execute(message, args, user) {
       !current_game.gameState.deadPlayers.includes(parseInt(args[0]) - 1) &&
       !current_game.gameState.invPlayers.includes(parseInt(args[0]) - 1) &&
       current_game.gameState.phase === "bugWait" &&
-      current_game.players[current_game.gameState.presidentId].id ===
-        message.author.id
+      (current_game.players[current_game.gameState.presidentId].id === message.author.id ||
+        current_game.players[current_game.gameState.chancellorId].id === message.author.id)
     ) {
       const selectedPlayer = parseInt(args[0]) - 1;
       const selectedPlayerRole = current_game.players[selectedPlayer].role;
       let buggingResult;
 
-      if (["liberal", "merlin", "percival"].includes(selectedPlayerRole)) {
+      if (["liberal", "centrist", "merlin", "percival"].includes(selectedPlayerRole)) {
         buggingResult = "liberal";
-      } else if (["fascist", "hitler", "monarchist"].includes(selectedPlayerRole)) {
+      } else if (["fascist", "hitler", "monarchist", "morgana", "capitalist"].includes(selectedPlayerRole)) {
         buggingResult = "fascist";
-      } else if (selectedPlayerRole === "communist") {
+      } else if (["communist", "anarchist"].includes(selectedPlayerRole)) {
         buggingResult = "communist";
       } else {
         buggingResult = "unknown"; // Just in case there's an unexpected role

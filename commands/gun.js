@@ -15,6 +15,9 @@ async function execute(message, args, user) {
     const hitler_index = current_game.players.findIndex(
       (player) => player.role === "hitler"
     );
+    const capitalist_index = current_game.players.findIndex(
+      (player) => player.role === "capitalist"
+    );
     if (
       args.length &&
       _.range(0, current_game.players.length).includes(parseInt(args[0]) - 1) &&
@@ -30,6 +33,8 @@ async function execute(message, args, user) {
         current_game.gameState.hitlerDead = true;
         if (current_game.customGameSettings.avalon)
           current_game.gameState.phase = "assassinWait";
+      } else if (parseInt(args[0]) - 1 === capitalist_index) {
+        current_game.gameState.phase = "radicalizationWait";
       }
       current_game.gameState.lastPresidentId =
         current_game.gameState.presidentId;

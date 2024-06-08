@@ -170,6 +170,53 @@ async function notifyRoles(message, current_game, roles) {
           );
         }
       }
+    } else if (roles[i] === "centrist") {
+      for (let j = 0; j < current_game.playerCount; j++) {
+        if (i !== j && roles[j] === "centrist") {
+          await sendDM(
+            message,
+            current_game,
+            "Role Notification:",
+            `The player <@${current_game.players[j].id}> in seat **${
+              current_game.players[j].seat + 1
+            }** is **centrist**.`,
+            current_game.players[i].id,
+            "centrist"
+          );
+        }
+      }
+    } else if (roles[i] === "communist") {
+      for (let j = 0; j < current_game.playerCount; j++) {
+        if (i !== j && roles[j] === "communist") {
+          await sendDM(
+            message,
+            current_game,
+            "Role Notification:",
+            `The player <@${current_game.players[j].id}> in seat **${
+              current_game.players[j].seat + 1
+            }** is **communist**.`,
+            current_game.players[i].id,
+            "communist"
+          );
+        } else if (i !== j && roles[j] === "anarchist") {
+          await sendDM(
+            message,
+            current_game,
+            "Role Notification:",
+            `The player <@${current_game.players[j].id}> in seat **${
+              current_game.players[j].seat + 1
+            }** is **anarchist**.`,
+            current_game.players[i].id,
+            "communist"
+          );
+        }
+      }
+    } else if (roles[i] === "anarchist") {
+      for (let j = 0; j < current_game.playerCount; j++) {
+        if (i !== j && roles[j] === "communist") {
+          // Do nothing: Anarchists should not see the communists
+        }
+      }
     }
   }
 }

@@ -46,12 +46,7 @@ async function execute(message, args, user) {
         current_game.gameState.phase = "radicalizationWait";
       }
 
-      current_game.gameState.lastPresidentId =
-        current_game.gameState.presidentId;
-      current_game.gameState.lastChancellorId =
-        current_game.gameState.chancellorId;
       current_game.gameState.log.execution = parseInt(args[0]) - 1;
-      advancePres(current_game);
       const deckState = current_game.gameState.deck.map((e) => policyMap[e]);
       deckState.reverse();
       current_game.gameState.log.deckState = deckState;

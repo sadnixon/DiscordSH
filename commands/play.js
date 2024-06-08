@@ -178,21 +178,13 @@ function handleCommunistPower(current_game, power_slot, message) {
     current_game.gameState.log.buggingPresidentId =
       current_game.gameState.presidentId;
   } else if (power_slot === "radicalization") {
-    current_game.gameState.phase = "radicalizeWait";
-    current_game.gameState.log.radicalizePresidentId =
-      current_game.gameState.presidentId;
+    current_game.gameState.phase = "radicalizationWait";
   } else if (power_slot === "fiveYearPlan") {
-    current_game.gameState.phase = "fiveYearWait";
-    current_game.gameState.log.fiveYearPresidentId =
-      current_game.gameState.presidentId;
+//needs fun code
   } else if (power_slot === "congress") {
-    current_game.gameState.phase = "congressWait";
-    current_game.gameState.log.congressPresidentId =
-      current_game.gameState.presidentId;
+//needs fun code
   } else if (power_slot === "confession") {
-    current_game.gameState.phase = "confessWait";
-    current_game.gameState.log.confessPresidentId =
-      current_game.gameState.presidentId;
+current_game.gameState.phase = "confessionWait";
   }
 }
 

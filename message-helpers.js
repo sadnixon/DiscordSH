@@ -32,8 +32,9 @@ const policyMap = {
 };
 
 const roleLists = {
-  liberal: ["liberal", "percival", "merlin"],
+  liberal: ["liberal", "percival", "merlin", "capitalist", "centrist"],
   fascist: ["fascist", "morgana", "hitler", "monarchist"],
+  communist: ["anarchist", "communist"],
 };
 
 const handColor = (hand) => {
@@ -81,8 +82,14 @@ async function gameStateMessage(message, game) {
     );
   }
 const votes = _.range(0, game.players.length).map((i) => {
-  const lobbyMultiplier = game.players[i].usedLobbyCard ? 3 : 1; // Check if the player has used the lobby card
+  const player = game.players[i];
+  const lobbyMultiplier = player.usedLobbyCard ? 3 : 1; // Check if the player has used the lobby card
   const vote = game.gameState.votes[i];
+
+  // Reset the usedLobbyCard property after the vote is calculated
+  if (player.usedLobbyCard) {
+    player.usedLobbyCard = false;
+  }
 
   if (vote === true) {
     return "Ja".repeat(lobbyMultiplier); // Multiply "Ja" by lobbyMultiplier
@@ -365,6 +372,7 @@ const roleListConstructor = (game) => {
     8: ["liberal", "liberal", "liberal", "hitler"],
     9: ["liberal", "liberal", "liberal", "fascist", "hitler"],
     10: ["liberal", "liberal", "liberal", "liberal", "fascist", "hitler"],
+    13: ["liberal", "centrist", "centrist", "capitalist", "communist", "communist", "anarchist", "monarchist", "hitler"],
   };
 
   const secondLiberal =

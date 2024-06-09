@@ -77,10 +77,13 @@ async function execute(message, args, user) {
           current_game.gameState.presidentId;
         current_game.gameState.log.chancellorId =
           current_game.gameState.chancellorId;
-        if (
-          vote_list.filter((e) => e).length >
-          vote_list.filter((e) => e !== null).length / 2
-        ) {
+	const extraVotesLobby = current_game.players[vote_index].usedLobbyCard ? 2 : 0;
+	const voteType = args[0].toLowerCase();
+	const lobbyCardUsed = current_game.players[vote_index].usedLobbyCard;
+	const voteMultiplier = (voteType === "nein" && lobbyCardUsed) ? -1 : 10;
+        const totalVotes = vote_list.filter((e) => e).length;
+        const requiredVotes = Math.ceil((current_game.players.length - current_game.gameState.deadPlayers.length) / 2);
+        if (totalVotes + extraVotesLobby * voteMultiplier > requiredVotes + extraVotesLobby) {
           if (
             current_game.gameState.fas >=
               current_game.customGameSettings.hitlerZone &&

@@ -22,8 +22,8 @@ async function execute(message, args, user) {
     }
 
     // Check if the lobby power has not been used
-    if (!current_game.gameState.lobbyPowerUsed) {
-      current_game.gameState.lobbyPowerUsed = true; // Mark lobby power as used
+  if (!current_game.gameState.lobbyUsed) {
+      current_game.gameState.lobbyUsed = true;
       current_game.players[playerIndex].usedLobbyCard = true;
       current_game.players[playerIndex].extraVotes = 2;
 

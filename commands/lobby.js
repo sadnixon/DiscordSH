@@ -21,24 +21,25 @@ async function execute(message, args, user) {
       return;
     }
 
-    if (current_game.players[playerIndex].usedLobbyCard) {
-      await message.channel.send(errorMessage("You have already used your lobby card."));
-      console.log(`Player with ID ${message.author.id} has already used their lobby card.`); // Log player already used lobby card
-      return;
+    // Check if the lobby power has not been used
+    if (!current_game.gameState.lobbyPowerUsed) {
+      current_game.gameState.lobbyPowerUsed = true; // Mark lobby power as used
+      current_game.players[playerIndex].usedLobbyCard = true;
+      current_game.players[playerIndex].extraVotes = 2;
+
+      await game_info.set(channels[message.channel.id], current_game);
+
+      await message.channel.send(
+        standardEmbed(
+          "Lobby Power Activated",
+          `<@${message.author.id}> has activated their lobby power for one election.`
+        )
+      );
+      console.log(`Player with ID ${message.author.id} activated lobby power.`); // Log lobby power activation
+    } else {
+      await message.channel.send(errorMessage("The lobby power has already been used in this game."));
+      console.log(`The lobby power has already been used in this game.`); // Log lobby power already used
     }
-
-    current_game.players[playerIndex].usedLobbyCard = true;
-    current_game.players[playerIndex].extraVotes = 2;
-
-    await game_info.set(channels[message.channel.id], current_game);
-
-    await message.channel.send(
-      standardEmbed(
-        "Lobby Power Activated",
-        `<@${message.author.id}> has activated their lobby power for one election.`
-      )
-    );
-    console.log(`Player with ID ${message.author.id} activated lobby power.`); // Log lobby power activation
   } else {
     message.channel.send(errorMessage("No game in this channel!"));
     console.log(`No game found in channel ${message.channel.id}.`); // Log no game in channel

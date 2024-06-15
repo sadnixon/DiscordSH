@@ -21,8 +21,8 @@ async function execute(message, args, user) {
       return;
     }
 
-    // Check if the lobby power has not been used
-  if (!current_game.gameState.lobbyUsed) {
+    // Check if the lobby card has not been used
+    if (!current_game.gameState.lobbyUsed) {
       current_game.gameState.lobbyUsed = true;
       current_game.players[playerIndex].usedLobbyCard = true;
       current_game.players[playerIndex].extraVotes = 2;
@@ -37,8 +37,8 @@ async function execute(message, args, user) {
       );
       console.log(`Player with ID ${message.author.id} activated lobby power.`); // Log lobby power activation
     } else {
-      await message.channel.send(errorMessage("The lobby power has already been used in this game."));
-      console.log(`The lobby power has already been used in this game.`); // Log lobby power already used
+      await message.channel.send(errorMessage("You have already used your lobby card."));
+      console.log(`Player with ID ${message.author.id} has already used their lobby card.`); // Log player already used lobby card
     }
   } else {
     message.channel.send(errorMessage("No game in this channel!"));

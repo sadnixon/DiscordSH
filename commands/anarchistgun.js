@@ -30,23 +30,34 @@ async function execute(message, args, user) {
       current_game.players[anarchist_index].id === message.author.id &&
       !current_game.gameState.anarchistShot
     ) {
-      current_game.gameState.deadPlayers.push(parseInt(args[0]) - 1);
+      const shotPlayerIndex = parseInt(args[0]) - 1;
+      current_game.gameState.deadPlayers.push(shotPlayerIndex);
       current_game.gameState.phase = "nomWait";
       current_game.gameState.anarchistShot = true;
 
-      if (parseInt(args[0]) - 1 === hitler_index) {
+      if (shotPlayerIndex === hitler_index) {
         // If the killed player is Hitler, perform actions accordingly
         current_game.gameState.hitlerDead = true;
         if (current_game.customGameSettings.avalon)
           current_game.gameState.phase = "assassinWait";
       }
 
-      if (parseInt(args[0]) - 1 === capitalist_index) {
+      if (shotPlayerIndex === capitalist_index) {
         // If the killed player is the capitalist, enter radicalizationWait
         current_game.gameState.phase = "radicalizationWait";
       }
 
-      current_game.gameState.log.execution = parseInt(args[0]) - 1;
+      current_game.gameState.lastPresidentId =
+        current_game.gameState.presidentId;
+      current_game.gameState.lastChancellorId =
+        current_game.gameState.chancellorId;
+      current_game.gameState.log.execution = shotPlayerIndex;
+
+      // Advance the president only if the shot player is the current president
+      if (shotPlayerIndex === current_game.gameState.presidentId) {
+        advancePres(current_game);
+      }
+
       const deckState = current_game.gameState.deck.map((e) => policyMap[e]);
       deckState.reverse();
       current_game.gameState.log.deckState = deckState;

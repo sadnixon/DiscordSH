@@ -231,18 +231,18 @@ async function checkGameEnd(message, game) {
       } else {
         end_method =
           "Five liberal policies were enacted, and Merlin survived! Liberals win!";
-        winning_players = ["liberal", "percival", "merlin"];
+        winning_players = ["liberal", "percival", "merlin", "capitalist", "centrist"];
       }
     } else {
       end_method = "Five liberal policies were enacted! Liberals win!";
-      winning_players = ["liberal"];
+      winning_players = ["liberal", "capitalist", "centrist"];
     }
   } else if (game.gameState.fas === 6) {
     end_method = "Six fascist policies were enacted! Fascists win!";
     winning_players = ["fascist", "morgana", "monarchist", "hitler"];
   } else if (game.gameState.comm === 6) {
     end_method = "Six communist policies were enacted! Communists win!";
-    winning_players = ["communist"];
+    winning_players = ["communist", "anarchist"];
   } else if (game.gameState.hitlerElected) {
     end_method = "Hitler was elected Chancellor! Fascists win!";
     winning_players = ["fascist", "morgana", "hitler"];
@@ -251,14 +251,14 @@ async function checkGameEnd(message, game) {
       if (game.players[game.gameState.assassinatedPlayer].role === "merlin") {
         end_method =
           "Hitler was executed, but Merlin was assassinated! Fascists win!";
-        winning_players = ["fascist", "morgana", "monarchist", "hitler"];
+        winning_players = ["fascist", "morgana", "monarchist", "hitler", "communist", "anarchist"];
       } else {
         end_method = "Hitler was executed, and Merlin survived! Liberals win!";
-        winning_players = ["liberal", "percival", "merlin", "monarchist"];
+        winning_players = ["liberal", "centrist", "capitalist", "percival", "merlin", "monarchist", "communist", "anarchist"];
       }
     } else {
       end_method = "Hitler was executed! Liberals win!";
-      winning_players = ["liberal", "monarchist"];
+      winning_players = ["liberal", "capitalist", "centrist", "monarchist", "communist", "anarchist"];
     }
   } else if (game.gameState.topDecks === game.gameSetting.noTopdecking) {
     end_method = "The Hammer has been failed! Fascists win!";
@@ -271,7 +271,7 @@ async function checkGameEnd(message, game) {
     : "liberal";
 
   const badgeSelector = (role) => {
-    const liberal_roles = ["liberal", "percival", "merlin"];
+    const liberal_roles = ["liberal", "percival", "merlin", "capitalist", "centrist"];
     const fascist_roles = ["fascist", "morgana", "monarchist", "hitler"];
 
     if (liberal_roles.includes(role)) {
@@ -372,7 +372,12 @@ const roleListConstructor = (game) => {
     8: ["liberal", "liberal", "liberal", "hitler"],
     9: ["liberal", "liberal", "liberal", "fascist", "hitler"],
     10: ["liberal", "liberal", "liberal", "liberal", "fascist", "hitler"],
-    13: ["liberal", "centrist", "centrist", "capitalist", "communist", "communist", "anarchist", "monarchist", "hitler"],
+    11: ["centrist", "centrist", "communist", "communist", "fascist", "hitler"],
+    12: ["liberal", "liberal", "capitalist", "communist", "communist", "fascist", "hitler"],
+    13: ["capitalist", "centrist", "centrist", "communist", "communist", "anarchist", "fascist", "hitler"],
+    14: ["liberal", "liberal", "liberal", "liberal", "communist", "communist", "anarchist", "fascist", "hitler"],
+    15: ["liberal", "capitalist", "centrist", "centrist", "communist", "communist", "anarchist", "fascist", "fascist", "hitler"],
+    16: ["liberal", "capitalist", "centrist", "centrist", "communist", "communist", "communist", "anarchist", "fascist", "fascist", "hitler"],
   };
 
   const secondLiberal =

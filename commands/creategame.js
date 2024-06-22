@@ -43,7 +43,7 @@ async function execute(message, args, user) {
     let powers;
     if (playerCount === 5 || playerCount === 6) {
       powers = [null, null, "peek", "bullet", "bullet"];
-    } else if (playerCount < 16) {
+    } else if (playerCount > 8) {
       powers = ["investigate", "investigate", "election", "bullet", "bullet"];
     } else if (playerCount === 7 || playerCount === 8) {
       powers = [null, "investigate", "election", "bullet", "bullet"];
@@ -130,7 +130,6 @@ async function execute(message, args, user) {
         hitlerElected: false,
         hitlerDead: false,
         assassinatedPlayer: -1,
-	      usedLobbyCard: [], //doubt this is actually needed, but I have been working on this too long
         log: {},
       },
     };

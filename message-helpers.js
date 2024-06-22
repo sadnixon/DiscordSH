@@ -372,12 +372,12 @@ const roleListConstructor = (game) => {
     8: ["liberal", "liberal", "liberal", "hitler"],
     9: ["liberal", "liberal", "liberal", "fascist", "hitler"],
     10: ["liberal", "liberal", "liberal", "liberal", "fascist", "hitler"],
-    11: ["centrist", "centrist", "communist", "communist", "fascist", "hitler"],
-    12: ["liberal", "liberal", "capitalist", "communist", "communist", "fascist", "hitler"],
-    13: ["capitalist", "centrist", "centrist", "communist", "communist", "anarchist", "fascist", "hitler"],
-    14: ["liberal", "liberal", "liberal", "liberal", "communist", "communist", "anarchist", "fascist", "hitler"],
-    15: ["liberal", "capitalist", "centrist", "centrist", "communist", "communist", "anarchist", "fascist", "fascist", "hitler"],
-    16: ["liberal", "capitalist", "centrist", "centrist", "communist", "communist", "communist", "anarchist", "fascist", "fascist", "hitler"],
+    11: ["liberal", "centrist", "centrist", "communist", "communist", "fascist", "hitler"],
+    12: ["liberal", "liberal", "liberal", "capitalist", "communist", "communist", "fascist", "hitler"],
+    13: ["liberal", "capitalist", "centrist", "centrist", "communist", "communist", "anarchist", "fascist", "hitler"],
+    14: ["liberal", "liberal", "liberal", "liberal", "liberal", "communist", "communist", "anarchist", "fascist", "hitler"],
+    15: ["liberal", "liberal", "capitalist", "centrist", "centrist", "communist", "communist", "anarchist", "fascist", "fascist", "hitler"],
+    16: ["liberal", "liberal", "capitalist", "centrist", "centrist", "communist", "communist", "communist", "anarchist", "fascist", "fascist", "hitler"],
   };
 
   const secondLiberal =

@@ -22,19 +22,19 @@ async function execute(message, args, user) {
         if (args.map((e) => e.toLowerCase()).includes("percival")) percy = true;
       }
       if (args.map((e) => e.toLowerCase()).includes("communist")) communist = true;
-      playerCount = parseInt(args.find((num) => parseInt(num) >= 5 && parseInt(num) <= 10));
+      playerCount = parseInt(args.find((num) => parseInt(num) >= 5 && parseInt(num) <= 16));
     } else {
       // If no player count is specified, prompt the user to provide it
       message.channel.send(
-        errorMessage("Please specify the number of players (between 5 and 10).")
+        errorMessage("Please specify the number of players (between 5 and 16).")
       );
       return;
     }
 
-    if (isNaN(playerCount) || playerCount < 5 || playerCount > 10) {
+    if (isNaN(playerCount) || playerCount < 5 || playerCount > 16) {
       message.channel.send(
         errorMessage(
-          "Invalid player count. Please specify a number between 5 and 10."
+          "Invalid player count. Please specify a number between 5 and 16."
         )
       );
       return;
@@ -43,7 +43,7 @@ async function execute(message, args, user) {
     let powers;
     if (playerCount === 5 || playerCount === 6) {
       powers = [null, null, "peek", "bullet", "bullet"];
-    } else if (playerCount === 9 || playerCount === 10) {
+    } else if (playerCount > 8) {
       powers = ["investigate", "investigate", "election", "bullet", "bullet"];
     } else if (playerCount === 7 || playerCount === 8) {
       powers = [null, "investigate", "election", "bullet", "bullet"];

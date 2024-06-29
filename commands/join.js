@@ -61,7 +61,8 @@ async function execute(message, args, user) {
             "Role Assignment:",
             `Your seat is **${i + 1}** and your role is **${roles[i]}**`,
             current_game.players[i].id,
-            roleLists.liberal.includes(roles[i]) ? "liberal" : "fascist"
+            roleLists.liberal.includes(roles[i]) ? "liberal" : (roles[i] === "communist" || roles[i] === "anarchist" ? "communist" : "fascist")
+
           );
         }
 
@@ -170,8 +171,38 @@ async function notifyRoles(message, current_game, roles) {
           );
         }
       }
+    } else if (roles[i] === "centrist") {
+      for (let j = 0; j < current_game.playerCount; j++) {
+        if (i !== j && roles[j] === "centrist") {
+          await sendDM(
+            message,
+            current_game,
+            "Role Notification:",
+            `The player <@${current_game.players[j].id}> in seat **${
+              current_game.players[j].seat + 1
+            }** is **centrist**.`,
+            current_game.players[i].id,
+            "liberal"
+          );
+        }
+      }
+} else if (roles[i] === "communist") {
+  for (let j = 0; j < current_game.playerCount; j++) {
+    if (i !== j && (roles[j] === "communist" || roles[j] === "anarchist")) {
+      await sendDM(
+        message,
+        current_game,
+        "Role Notification:",
+        `The player <@${current_game.players[j].id}> in seat **${
+          current_game.players[j].seat + 1
+        }** is **${roles[j]}**.`,
+        current_game.players[i].id,
+        "communist"
+        );
+      }
     }
   }
+}
 }
 
 module.exports = {

@@ -84,7 +84,7 @@ async function execute(message, args, user) {
           current_game.logs.push(current_game.gameState.log);
           current_game.gameState.log = {};
         } else {
-          handleCommunistPower(current_game, power_slot, message);
+          await handleCommunistPower(current_game, power_slot, message);
         }
       } else {
         // Fascist policy enacted
@@ -172,27 +172,80 @@ async function execute(message, args, user) {
   }
 }
 
-function handleCommunistPower(current_game, power_slot, message) {
+async function handleCommunistPower(current_game, power_slot, message) {
   if (power_slot === "bugging") {
     current_game.gameState.phase = "bugWait";
     current_game.gameState.log.buggingPresidentId =
       current_game.gameState.presidentId;
   } else if (power_slot === "radicalization") {
-    current_game.gameState.phase = "radicalizeWait";
-    current_game.gameState.log.radicalizePresidentId =
-      current_game.gameState.presidentId;
+    current_game.gameState.phase = "radicalizationWait";
   } else if (power_slot === "fiveYearPlan") {
-    current_game.gameState.phase = "fiveYearWait";
-    current_game.gameState.log.fiveYearPresidentId =
+    // Add the 5 year plan functionality
+    current_game.gameState.deck.push("C", "C", "B");
+    shuffleArray(current_game.gameState.deck);
+    current_game.gameState.phase = "nomWait";
+    current_game.gameState.lastPresidentId =
       current_game.gameState.presidentId;
-  } else if (power_slot === "congress") {
-    current_game.gameState.phase = "congressWait";
-    current_game.gameState.log.congressPresidentId =
+    current_game.gameState.lastChancellorId =
+      current_game.gameState.chancellorId;
+    advancePres(current_game);
+    const deckState = current_game.gameState.deck.map((e) => policyMap[e]);
+    deckState.reverse();
+    current_game.gameState.log.deckState = deckState;
+    current_game.logs.push(current_game.gameState.log);
+    current_game.gameState.log = {};
+
+    // Announce the 5 year plan shuffle
+    await sendToChannel(
+      message,
+      current_game,
+      standardEmbed(
+        `Five Year Plan Activated!`,
+        `Two communist policies and one liberal policy have been shuffled into the policy deck.`,
+        "communist"
+      )
+    );
+ } else if (power_slot === "congress") {
+    // Congress functionality
+    await sendToChannel(
+      message,
+      current_game,
+      standardEmbed(
+        `Congress Activated!`,
+        `Everyone, please close your eyes. Communists, open your eyes and recognize your comrades.`,
+        "communist"
+      )
+    );
+
+    // Notify communists to open their eyes and recognize each other
+    const communists = current_game.players.filter(
+        (player) => player.role === "communist"
+    );
+    const comradeIds = communists.map((comrade) => `<@${comrade.id}>`).join(", ");
+    for (const communist of communists) {
+        await sendDM(
+            message,
+            current_game,
+            "Congress Activated!",
+            `Communists, open your eyes and recognize your comrades. Here are the names of your comrades: ${comradeIds}`,
+            communist.id
+        );
+    }
+
+    // Set game phase to nomination wait after Congress phase
+    current_game.gameState.phase = "nomWait";
+    current_game.gameState.lastPresidentId =
       current_game.gameState.presidentId;
+    current_game.gameState.lastChancellorId =
+      current_game.gameState.chancellorId;
+    advancePres(current_game);
+    const deckState = current_game.gameState.deck.map((e) => policyMap[e]);
+    deckState.reverse();
+    current_game.gameState.log.deckState = deckState;
+    current_game.logs.push(current_game.gameState.log);
+    current_game.gameState.log = {};
   } else if (power_slot === "confession") {
-    current_game.gameState.phase = "confessWait";
-    current_game.gameState.log.confessPresidentId =
-      current_game.gameState.presidentId;
+    current_game.gameState.phase = "confessionWait";
   }
 }
 

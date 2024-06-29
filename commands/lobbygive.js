@@ -13,8 +13,6 @@ async function execute(message, args, user) {
       (player) => player.role === "capitalist"
     );
 
-    console.log(`Capitalist Index: ${capitalist_index}`);
-
     // Check if the capitalist has already given out the lobby card
     if (current_game.players[capitalist_index].hasGivenLobbyCard) {
       return await message.channel.send(
@@ -25,11 +23,6 @@ async function execute(message, args, user) {
     // Command to give the lobby card to another living player
     if (message.author.id === current_game.players[capitalist_index].id) {
       const lobbyRecipientIndex = parseInt(args[0]) - 1;
-
-      console.log(`Lobby Recipient Index: ${lobbyRecipientIndex}`);
-      console.log(
-        `Dead Players: ${JSON.stringify(current_game.gameState.deadPlayers)}`
-      );
 
       if (
         lobbyRecipientIndex >= 0 &&

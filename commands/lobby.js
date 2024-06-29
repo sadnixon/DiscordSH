@@ -9,7 +9,6 @@ async function execute(message, args, user) {
   const player_games = await game_info.get("player_games");
   if (message.author.id in player_games) {
     const current_game = await game_info.get(player_games[message.author.id]);
-    console.log(`Current game: ${JSON.stringify(current_game)}`); // Log current game data
     const playerIndex = current_game.players.findIndex(
       (player) => player.id === message.author.id
     );
@@ -18,9 +17,6 @@ async function execute(message, args, user) {
       await message.channel.send(
         errorMessage("You are not part of this game.")
       );
-      console.log(
-        `Player with ID ${message.author.id} is not part of the game.`
-      ); // Log player not found
       return;
     }
 
@@ -28,9 +24,6 @@ async function execute(message, args, user) {
       await message.channel.send(
         errorMessage("You do not have a lobby card to use.")
       );
-      console.log(
-        `Player with ID ${message.author.id} does not have a lobby card.`
-      ); // Log player without lobby card
       return;
     }
 
@@ -50,14 +43,10 @@ async function execute(message, args, user) {
           `<@${message.author.id}> has activated their lobby power for one election.`
         )
       );
-      console.log(`Player with ID ${message.author.id} activated lobby power.`); // Log lobby power activation
     } else {
       await message.channel.send(
         errorMessage("You have already used your lobby card.")
       );
-      console.log(
-        `Player with ID ${message.author.id} has already used their lobby card.`
-      ); // Log player already used lobby card
     }
   } else {
     message.channel.send(errorMessage("Player not in game!"));

@@ -55,15 +55,6 @@ async function execute(message, args, user) {
           current_game.players[i].role = roles[i];
           current_game.players[i].seat = i;
           current_game.player_ids[current_game.players[i].id] = i;
-          await sendDM(
-            message,
-            current_game,
-            "Role Assignment:",
-            `Your seat is **${i + 1}** and your role is **${roles[i]}**`,
-            current_game.players[i].id,
-            roleLists.liberal.includes(roles[i]) ? "liberal" : (roles[i] === "communist" || roles[i] === "anarchist" ? "communist" : "fascist")
-
-          );
         }
 
         await notifyRoles(message, current_game, roles);
@@ -91,118 +82,96 @@ async function execute(message, args, user) {
 }
 
 async function notifyRoles(message, current_game, roles) {
+  let player_message;
   for (let i = 0; i < current_game.playerCount; i++) {
-    const player = current_game.players[i];
+    player_message = `Your seat is **${i + 1}** and your role is **${
+      roles[i]
+    }**`;
     if (
       ["fascist", "morgana"].includes(roles[i]) ||
       (roles[i] === "hitler" && current_game.customGameSettings.hitKnowsFas)
     ) {
+      player_message += "\n\n**Role Notifications:**";
       for (let j = 0; j < current_game.playerCount; j++) {
         if (i !== j && ["fascist", "hitler", "morgana"].includes(roles[j])) {
-          await sendDM(
-            message,
-            current_game,
-            "Role Notification:",
-            `The player <@${current_game.players[j].id}> in seat **${
-              current_game.players[j].seat + 1
-            }** is **${roles[j]}**.`,
-            current_game.players[i].id,
-            "fascist"
-          );
+          player_message += `\nThe player <@${
+            current_game.players[j].id
+          }> in seat **${current_game.players[j].seat + 1}** is **${
+            roles[j]
+          }**.`;
         } else if (i !== j && roles[j] === "monarchist") {
-          await sendDM(
-            message,
-            current_game,
-            "Role Notification:",
-            `The player <@${current_game.players[j].id}> in seat **${
-              current_game.players[j].seat + 1
-            }** is **fascist**.`,
-            current_game.players[i].id,
-            "fascist"
-          );
+          player_message += `\nThe player <@${
+            current_game.players[j].id
+          }> in seat **${current_game.players[j].seat + 1}** is **fascist**.`;
         }
       }
     } else if (roles[i] === "merlin") {
+      player_message += "\n\n**Role Notifications:**";
       for (let j = 0; j < current_game.playerCount; j++) {
         if (["fascist", "monarchist", "hitler", "morgana"].includes(roles[j])) {
-          await sendDM(
-            message,
-            current_game,
-            "Role Notification:",
-            `The player <@${current_game.players[j].id}> in seat **${
-              current_game.players[j].seat + 1
-            }** is **fascist**.`,
-            current_game.players[i].id,
-            "fascist"
-          );
+          player_message += `\nThe player <@${
+            current_game.players[j].id
+          }> in seat **${current_game.players[j].seat + 1}** is **fascist**.`;
         }
       }
     } else if (roles[i] === "monarchist") {
+      player_message += "\n\n**Role Notifications:**";
       for (let j = 0; j < current_game.playerCount; j++) {
         if (i !== j && ["fascist", "morgana"].includes(roles[j])) {
-          await sendDM(
-            message,
-            current_game,
-            "Role Notification:",
-            `The player <@${current_game.players[j].id}> in seat **${
-              current_game.players[j].seat + 1
-            }** is **fascist**.`,
-            current_game.players[i].id,
-            "fascist"
-          );
+          player_message += `\nThe player <@${
+            current_game.players[j].id
+          }> in seat **${current_game.players[j].seat + 1}** is **fascist**.`;
         }
       }
     } else if (roles[i] === "percival") {
+      player_message += "\n\n**Role Notifications:**";
       for (let j = 0; j < current_game.playerCount; j++) {
         if (
           i !== j &&
           (["merlin", "morgana"].includes(roles[j]) ||
             (current_game.playerCount < 7 && roles[j] === "monarchist"))
         ) {
-          await sendDM(
-            message,
-            current_game,
-            "Role Notification:",
-            `The player <@${current_game.players[j].id}> in seat **${
-              current_game.players[j].seat + 1
-            }** could be **merlin**.`,
-            current_game.players[i].id,
-            "liberal"
-          );
+          player_message += `\nThe player <@${
+            current_game.players[j].id
+          }> in seat **${
+            current_game.players[j].seat + 1
+          }** could be **merlin**.`;
         }
       }
     } else if (roles[i] === "centrist") {
+      player_message += "\n\n**Role Notifications:**";
       for (let j = 0; j < current_game.playerCount; j++) {
         if (i !== j && roles[j] === "centrist") {
-          await sendDM(
-            message,
-            current_game,
-            "Role Notification:",
-            `The player <@${current_game.players[j].id}> in seat **${
-              current_game.players[j].seat + 1
-            }** is **centrist**.`,
-            current_game.players[i].id,
-            "liberal"
-          );
+          player_message += `\nThe player <@${
+            current_game.players[j].id
+          }> in seat **${current_game.players[j].seat + 1}** is **centrist**.`;
         }
       }
-} else if (roles[i] === "communist") {
-  for (let j = 0; j < current_game.playerCount; j++) {
-    if (i !== j && (roles[j] === "communist" || roles[j] === "anarchist")) {
-      await sendDM(
-        message,
-        current_game,
-        "Role Notification:",
-        `The player <@${current_game.players[j].id}> in seat **${
-          current_game.players[j].seat + 1
-        }** is **${roles[j]}**.`,
-        current_game.players[i].id,
-        "communist"
-        );
+    } else if (roles[i] === "communist") {
+      player_message += "\n\n**Role Notifications:**";
+      for (let j = 0; j < current_game.playerCount; j++) {
+        if (i !== j && (roles[j] === "communist" || roles[j] === "anarchist")) {
+          player_message += `\nThe player <@${
+            current_game.players[j].id
+          }> in seat **${current_game.players[j].seat + 1}** is **${
+            roles[j]
+          }**.`;
+        }
       }
     }
+    await sendDM(
+      message,
+      current_game,
+      "Role Assignment:",
+      player_message,
+      current_game.players[i].id,
+      roleLists.liberal.includes(roles[i])
+        ? "liberal"
+        : roleLists.communist.includes(roles[i])
+        ? "communist"
+        : "fascist"
+    );
   }
-}
 }
 
 module.exports = {

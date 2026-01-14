@@ -31,12 +31,12 @@ async function execute(message, args, user) {
         "This decides if you are voting ja or nein for the current government. If you put neither vote, you will remove your current vote. Should be DM'd to the bot as voting is private.",
     },
     {
-      name: `${PREFIX}discard [L/F]`,
+      name: `${PREFIX}discard [B/R]`,
       value:
         "As president you can discard one card and give the other two to your chancellor. Should be DM'd to the bot as discarding is private.",
     },
     {
-      name: `${PREFIX}play [L/F]`,
+      name: `${PREFIX}play [B/R]`,
       value:
         "As chancellor you can play one of two cards you were given by your president.",
     },

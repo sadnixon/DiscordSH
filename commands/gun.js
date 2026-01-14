@@ -94,6 +94,6 @@ async function execute(message, args, user) {
 
 module.exports = {
   name: "gun",
-  aliases: ["execute"],
+  aliases: ["execute","shoot","kill","assassinate"],
   execute,
 };

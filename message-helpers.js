@@ -25,6 +25,22 @@ const standardEmbed = (header, message, team = "neutral") => {
   };
 };
 
+const synMap = (input) => {
+  const synDict = {
+    red: "R",
+    r: "R",
+    fascist: "R",
+    f: "R",
+    blue: "B",
+    b: "B",
+    liberal: "B",
+    l: "B",
+    communist: "C",
+    c: "C",
+  };
+  return synDict[input.toLowerCase()];
+};
+
 const policyMap = {
   B: "liberal",
   R: "fascist",
@@ -81,24 +97,24 @@ async function gameStateMessage(message, game) {
       game.gameState.lastChancellorId === i ? "(TL)" : ""
     );
   }
-const votes = _.range(0, game.players.length).map((i) => {
-  const player = game.players[i];
-  const lobbyMultiplier = player.usedLobbyCard ? 3 : 1; // Check if the player has used the lobby card
-  const vote = game.gameState.votes[i];
+  const votes = _.range(0, game.players.length).map((i) => {
+    const player = game.players[i];
+    const lobbyMultiplier = player.usedLobbyCard ? 3 : 1; // Check if the player has used the lobby card
+    const vote = game.gameState.votes[i];
 
-  // Reset the usedLobbyCard property after the vote is calculated
-  if (player.usedLobbyCard) {
-    player.usedLobbyCard = false;
-  }
+    // Reset the usedLobbyCard property after the vote is calculated
+    if (player.usedLobbyCard) {
+      player.usedLobbyCard = false;
+    }
 
-  if (vote === true) {
-    return "Ja".repeat(lobbyMultiplier); // Multiply "Ja" by lobbyMultiplier
-  } else if (vote === false) {
-    return "Nein".repeat(lobbyMultiplier); // Multiply "Nein" by lobbyMultiplier
-  } else {
-    return "";
-  }
-});
+    if (vote === true) {
+      return "Ja".repeat(lobbyMultiplier); // Multiply "Ja" by lobbyMultiplier
+    } else if (vote === false) {
+      return "Nein".repeat(lobbyMultiplier); // Multiply "Nein" by lobbyMultiplier
+    } else {
+      return "";
+    }
+  });
   const roles = _.range(0, game.players.length).map((i) =>
     !["liberal", "merlin", "percival"].includes(game.players[i].role) &&
     game.gameState.phase === "assassinWait"
@@ -231,7 +247,13 @@ async function checkGameEnd(message, game) {
       } else {
         end_method =
           "Five liberal policies were enacted, and Merlin survived! Liberals win!";
-        winning_players = ["liberal", "percival", "merlin", "capitalist", "centrist"];
+        winning_players = [
+          "liberal",
+          "percival",
+          "merlin",
+          "capitalist",
+          "centrist",
+        ];
       }
     } else {
       end_method = "Five liberal policies were enacted! Liberals win!";
@@ -251,14 +273,37 @@ async function checkGameEnd(message, game) {
       if (game.players[game.gameState.assassinatedPlayer].role === "merlin") {
         end_method =
           "Hitler was executed, but Merlin was assassinated! Fascists win!";
-        winning_players = ["fascist", "morgana", "monarchist", "hitler", "communist", "anarchist"];
+        winning_players = [
+          "fascist",
+          "morgana",
+          "monarchist",
+          "hitler",
+          "communist",
+          "anarchist",
+        ];
       } else {
         end_method = "Hitler was executed, and Merlin survived! Liberals win!";
-        winning_players = ["liberal", "centrist", "capitalist", "percival", "merlin", "monarchist", "communist", "anarchist"];
+        winning_players = [
+          "liberal",
+          "centrist",
+          "capitalist",
+          "percival",
+          "merlin",
+          "monarchist",
+          "communist",
+          "anarchist",
+        ];
       }
     } else {
       end_method = "Hitler was executed! Liberals win!";
-      winning_players = ["liberal", "capitalist", "centrist", "monarchist", "communist", "anarchist"];
+      winning_players = [
+        "liberal",
+        "capitalist",
+        "centrist",
+        "monarchist",
+        "communist",
+        "anarchist",
+      ];
     }
   } else if (game.gameState.topDecks === game.gameSetting.noTopdecking) {
     end_method = "The Hammer has been failed! Fascists win!";
@@ -271,7 +316,13 @@ async function checkGameEnd(message, game) {
     : "liberal";
 
   const badgeSelector = (role) => {
-    const liberal_roles = ["liberal", "percival", "merlin", "capitalist", "centrist"];
+    const liberal_roles = [
+      "liberal",
+      "percival",
+      "merlin",
+      "capitalist",
+      "centrist",
+    ];
     const fascist_roles = ["fascist", "morgana", "monarchist", "hitler"];
 
     if (liberal_roles.includes(role)) {
@@ -372,12 +423,75 @@ const roleListConstructor = (game) => {
     8: ["liberal", "liberal", "liberal", "hitler"],
     9: ["liberal", "liberal", "liberal", "fascist", "hitler"],
     10: ["liberal", "liberal", "liberal", "liberal", "fascist", "hitler"],
-    11: ["liberal", "centrist", "centrist", "communist", "communist", "fascist", "hitler"],
-    12: ["liberal", "liberal", "liberal", "capitalist", "communist", "communist", "fascist", "hitler"],
-    13: ["liberal", "capitalist", "centrist", "centrist", "communist", "communist", "anarchist", "fascist", "hitler"],
-    14: ["liberal", "liberal", "liberal", "liberal", "liberal", "communist", "communist", "anarchist", "fascist", "hitler"],
-    15: ["liberal", "liberal", "capitalist", "centrist", "centrist", "communist", "communist", "anarchist", "fascist", "fascist", "hitler"],
-    16: ["liberal", "liberal", "capitalist", "centrist", "centrist", "communist", "communist", "communist", "anarchist", "fascist", "fascist", "hitler"],
+    11: [
+      "liberal",
+      "centrist",
+      "centrist",
+      "communist",
+      "communist",
+      "fascist",
+      "hitler",
+    ],
+    12: [
+      "liberal",
+      "liberal",
+      "liberal",
+      "capitalist",
+      "communist",
+      "communist",
+      "fascist",
+      "hitler",
+    ],
+    13: [
+      "liberal",
+      "capitalist",
+      "centrist",
+      "centrist",
+      "communist",
+      "communist",
+      "anarchist",
+      "fascist",
+      "hitler",
+    ],
+    14: [
+      "liberal",
+      "liberal",
+      "liberal",
+      "liberal",
+      "liberal",
+      "communist",
+      "communist",
+      "anarchist",
+      "fascist",
+      "hitler",
+    ],
+    15: [
+      "liberal",
+      "liberal",
+      "capitalist",
+      "centrist",
+      "centrist",
+      "communist",
+      "communist",
+      "anarchist",
+      "fascist",
+      "fascist",
+      "hitler",
+    ],
+    16: [
+      "liberal",
+      "liberal",
+      "capitalist",
+      "centrist",
+      "centrist",
+      "communist",
+      "communist",
+      "communist",
+      "anarchist",
+      "fascist",
+      "fascist",
+      "hitler",
+    ],
   };
 
   const secondLiberal =
@@ -459,6 +573,7 @@ module.exports = {
   advancePres,
   checkGameEnd,
   reshuffleCheck,
+  synMap,
   policyMap,
   roleLists,
   handColor,

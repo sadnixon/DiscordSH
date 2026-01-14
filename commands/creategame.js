@@ -21,7 +21,9 @@ async function execute(message, args, user) {
         avalon = true;
         if (args.map((e) => e.toLowerCase()).includes("percival")) percy = true;
       }
+
       if (args.map((e) => e.toLowerCase()).includes("communist")) communist = true;
+      
       playerCount = parseInt(args.find((num) => parseInt(num) >= 5 && parseInt(num) <= 16));
     } else {
       // If no player count is specified, prompt the user to provide it

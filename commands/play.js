@@ -6,6 +6,7 @@ const {
   advancePres,
   checkGameEnd,
   policyMap,
+  synMap,
   reshuffleCheck,
   sendToChannel,
   standardEmbed,
@@ -19,20 +20,20 @@ async function execute(message, args, user) {
     if (
       args.length &&
       current_game.gameState.phase === "chancWait" &&
-      current_game.gameState.chancellorHand.includes(args[0]) &&
+      current_game.gameState.chancellorHand.includes(synMap(args[0])) &&
       current_game.players[current_game.gameState.chancellorId].id ===
         message.author.id
     ) {
       current_game.gameState.failedGovs = 0;
       current_game.gameState.topDecks = 0;
       current_game.gameState.chancellorHand.splice(
-        current_game.gameState.chancellorHand.indexOf(args[0]),
+        current_game.gameState.chancellorHand.indexOf(synMap(args[0])),
         1
       );
       current_game.gameState.discard.push(
         current_game.gameState.chancellorHand.pop()
       );
-      current_game.gameState.log.enactedPolicy = policyMap[args[0]];
+      current_game.gameState.log.enactedPolicy = policyMap[synMap(args[0])];
       await sendToChannel(
         message,
         current_game,
@@ -40,11 +41,11 @@ async function execute(message, args, user) {
           `Policy Played!`,
           `${current_game.gameState.chancellorId + 1}. <@${
             message.author.id
-          }> played a **${policyMap[args[0]]}** policy.`,
-          policyMap[args[0]]
+          }> played a **${policyMap[synMap(args[0])]}** policy.`,
+          policyMap[synMap(args[0])]
         )
       );
-      if (args[0] === "B") {
+      if (synMap(args[0]) === "B") {
         // Liberal policy enacted
         current_game.gameState.phase = "nomWait";
         current_game.gameState.lastPresidentId =
@@ -61,7 +62,7 @@ async function execute(message, args, user) {
         if (current_game.customGameSettings.avalon && current_game.gameState.lib === 5) {
           current_game.gameState.phase = "assassinWait";
         }
-      } else if (args[0] === "C") {
+      } else if (synMap(args[0]) === "C") {
         // Communist policy enacted
         current_game.gameState.comm++;
         const power_slot =

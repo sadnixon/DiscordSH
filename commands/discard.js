@@ -4,6 +4,7 @@ const {
   sendDM,
   gameStateMessage,
   policyMap,
+  synMap,
   handColor,
   sendToChannel,
   standardEmbed,
@@ -17,14 +18,14 @@ async function execute(message, args, user) {
     if (
       args.length &&
       current_game.gameState.phase === "presWait" &&
-      current_game.gameState.presidentHand.includes(args[0]) &&
+      current_game.gameState.presidentHand.includes(synMap(args[0])) &&
       current_game.players[current_game.gameState.presidentId].id ===
         message.author.id
     ) {
       current_game.gameState.phase = "chancWait";
       current_game.gameState.discard.push(
         current_game.gameState.presidentHand.splice(
-          current_game.gameState.presidentHand.indexOf(args[0]),
+          current_game.gameState.presidentHand.indexOf(synMap(args[0])),
           1
         )[0]
       );
